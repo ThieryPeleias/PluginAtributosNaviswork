@@ -122,6 +122,7 @@ namespace Virtuart4DNavisworks
                     COMApi.InwOpSelection oSel = ComBridge.ToInwOpSelection(leafCollection);
                     int processedPaths = 0;
                     int meshesExported = 0;
+                    int fragmentActorsCreated = 0;
 
                     foreach (COMApi.InwOaPath3 path in oSel.Paths())
                     {
@@ -129,112 +130,127 @@ namespace Virtuart4DNavisworks
                         ModelItem item = ComBridge.ToModelItem(path);
                         if (item == null) continue;
 
-                        FDatasmithFacadeActor actor = null;
+                        FDatasmithFacadeActor parentActor = null;
                         ModelItem current = item;
                         while (current != null)
                         {
-                            if (actorsMap.TryGetValue(current, out actor))
+                            if (actorsMap.TryGetValue(current, out parentActor))
                             {
                                 break;
                             }
                             current = current.Parent;
                         }
 
-                        if (actor == null)
+                        if (parentActor == null)
                         {
                             continue;
                         }
 
-                        if (actor is FDatasmithFacadeActorMesh actorMesh)
+                        try
                         {
-                            try
+                            dynamic fragsColl = path.Fragments();
+                            int fragsCount = fragsColl.Count;
+                            string parentName = parentActor.GetName();
+                            string parentLabel = parentActor.GetLabel();
+
+                            for (int f = 1; f <= fragsCount; f++)
                             {
-                                // Process and accumulate all fragments for this path safely
-                                var allVertices = new List<float>();
-                                var allNormals = new List<float>();
-                                var allIndices = new List<int>();
-
-                                dynamic fragsColl = path.Fragments();
-                                int fragsCount = fragsColl.Count;
-
-                                for (int f = 1; f <= fragsCount; f++)
+                                try
                                 {
-                                    try
-                                    {
-                                        dynamic frag = fragsColl.Item(f);
-                                        if (frag == null) continue;
+                                    dynamic frag = fragsColl.Item(f);
+                                    if (frag == null) continue;
 
-                                        // Bake world matrix using frag.GetLocalToWorldMatrix()
-                                        var callback = new DatasmithGeometryCallback(frag.GetLocalToWorldMatrix());
-                                        frag.GenerateSimplePrimitives(COMApi.nwEVertexProperty.eNORMAL, callback);
+                                    // Extract geometry in LOCAL space (null matrix = no world bake)
+                                    var callback = new DatasmithGeometryCallback(null);
+                                    frag.GenerateSimplePrimitives(COMApi.nwEVertexProperty.eNORMAL, callback);
 
-                                        if (callback.Vertices.Count > 0)
-                                        {
-                                            int vertOffset = allVertices.Count / 3;
-                                            allVertices.AddRange(callback.Vertices);
-                                            allNormals.AddRange(callback.Normals);
+                                    if (callback.Vertices.Count == 0) continue;
 
-                                            foreach (int idx in callback.Indices)
-                                            {
-                                                allIndices.Add(vertOffset + idx);
-                                            }
-                                        }
-                                    }
-                                    catch (Exception fragEx)
-                                    {
-                                        Log($"[Fragment Error] Failed to process fragment {f} on path: {fragEx.Message}");
-                                    }
-                                }
+                                    // Decompose fragment's local-to-world matrix into transform components
+                                    DatasmithGeometryCallback.DecomposeMatrix(
+                                        frag.GetLocalToWorldMatrix(),
+                                        out float tx, out float ty, out float tz,
+                                        out float qx, out float qy, out float qz, out float qw,
+                                        out float sx, out float sy, out float sz);
 
-                                // Generate Datasmith mesh if geometry vertices are found
-                                if (allVertices.Count > 0)
-                                {
+                                    // Create mesh for this fragment
+                                    string meshName = $"{parentName}_Mesh_{f}";
+                                    string meshElementName = $"{parentName}_Mesh_{f}Element";
+                                    string actorName = $"{parentName}_Actor_{f}";
+                                    string actorLabel = $"{parentLabel}_{f}";
+
                                     using (var mesh = new FDatasmithFacadeMesh())
                                     {
-                                        mesh.SetName(actorMesh.GetName() + "_Mesh");
-                                        mesh.SetVerticesCount(allVertices.Count / 3);
-                                        for (int i = 0; i < allVertices.Count / 3; i++)
+                                        mesh.SetName(meshName);
+                                        int vertCount = callback.Vertices.Count / 3;
+                                        mesh.SetVerticesCount(vertCount);
+                                        for (int i = 0; i < vertCount; i++)
                                         {
-                                            mesh.SetVertex(i, allVertices[i * 3], allVertices[i * 3 + 1], allVertices[i * 3 + 2]);
-                                            mesh.SetNormal(i, allNormals[i * 3], allNormals[i * 3 + 1], allNormals[i * 3 + 2]);
+                                            // Vertices are in local fragment space; apply scale+Y-invert for Unreal coord system
+                                            float vx = callback.Vertices[i * 3] * 100.0f;
+                                            float vy = -callback.Vertices[i * 3 + 1] * 100.0f;
+                                            float vz = callback.Vertices[i * 3 + 2] * 100.0f;
+                                            mesh.SetVertex(i, vx, vy, vz);
+
+                                            float nx = callback.Normals[i * 3];
+                                            float ny = -callback.Normals[i * 3 + 1];
+                                            float nz = callback.Normals[i * 3 + 2];
+                                            mesh.SetNormal(i, nx, ny, nz);
                                         }
 
-                                        mesh.SetFacesCount(allIndices.Count / 3);
-                                        for (int i = 0; i < allIndices.Count / 3; i++)
+                                        int faceCount = callback.Indices.Count / 3;
+                                        mesh.SetFacesCount(faceCount);
+                                        for (int i = 0; i < faceCount; i++)
                                         {
-                                            mesh.SetFace(i, allIndices[i * 3], allIndices[i * 3 + 1], allIndices[i * 3 + 2]);
+                                            mesh.SetFace(i, callback.Indices[i * 3], callback.Indices[i * 3 + 1], callback.Indices[i * 3 + 2]);
                                         }
 
-                                        var meshElement = new FDatasmithFacadeMeshElement(actorMesh.GetName() + "_MeshElement");
-                                        meshElement.SetLabel(actorMesh.GetLabel() + "_Mesh");
+                                        var meshElement = new FDatasmithFacadeMeshElement(meshElementName);
+                                        meshElement.SetLabel(actorLabel + "_Mesh");
 
                                         bool meshSuccess = scene.ExportDatasmithMesh(meshElement, mesh);
                                         if (meshSuccess)
                                         {
                                             scene.AddMesh(meshElement);
-                                            actorMesh.SetMesh(meshElement.GetName());
+
+                                            // Create fragment ActorMesh child with decomposed transform
+                                            var fragActorMesh = new FDatasmithFacadeActorMesh(actorName);
+                                            fragActorMesh.SetLabel(actorLabel);
+                                            fragActorMesh.SetMesh(meshElementName);
+
+                                            // Set the fragment's world transform (decomposed from its local-to-world matrix)
+                                            fragActorMesh.SetTranslation(tx, ty, tz);
+                                            fragActorMesh.SetRotation(qx, qy, qz, qw);
+                                            fragActorMesh.SetScale(sx, sy, sz);
+
+                                            parentActor.AddChild(fragActorMesh);
+                                            fragmentActorsCreated++;
                                             meshesExported++;
                                         }
                                         else
                                         {
-                                            Log($"[Mesh Error] FDatasmithFacadeScene::ExportDatasmithMesh returned false for: {meshElement.GetName()}");
+                                            Log($"[Mesh Error] ExportDatasmithMesh returned false for: {meshElementName}");
                                             meshElement.Dispose();
                                         }
                                     }
                                 }
+                                catch (Exception fragEx)
+                                {
+                                    Log($"[Fragment Error] Failed to process fragment {f} on path: {fragEx.Message}");
+                                }
                             }
-                            catch (Exception pathEx)
-                            {
-                                Log($"[Path Error] Failed to process geometry on path: {pathEx.Message}");
-                            }
+                        }
+                        catch (Exception pathEx)
+                        {
+                            Log($"[Path Error] Failed to process geometry on path: {pathEx.Message}");
                         }
 
                         if (processedPaths % 500 == 0)
                         {
-                            Log($"Progress: Processed {processedPaths} nodes. Exported {meshesExported} meshes...");
+                            Log($"Progress: Processed {processedPaths} leaf nodes. Created {fragmentActorsCreated} fragment actors, exported {meshesExported} meshes...");
                         }
                     }
-                    Log($"Step 2 Completed. Total processed paths: {processedPaths}. Exported meshes: {meshesExported}.");
+                    Log($"Step 2 Completed. Processed {processedPaths} paths. Created {fragmentActorsCreated} fragment actors. Exported {meshesExported} meshes.");
 
                     Log("Step 3/3: Saving Datasmith scene and finalizing export...");
                     bool success = scene.ExportScene(filePath);
@@ -269,16 +285,9 @@ namespace Virtuart4DNavisworks
             string guidStr = item.InstanceGuid != Guid.Empty ? item.InstanceGuid.ToString() : item.GetHashCode().ToString();
             string cleanName = "Node_" + guidStr.Replace("{", "").Replace("}", "").Replace("-", "_");
 
-            FDatasmithFacadeActor currentActor = null;
-
-            if (item.HasGeometry && !System.Linq.Enumerable.Any(item.Children))
-            {
-                currentActor = new FDatasmithFacadeActorMesh(cleanName);
-            }
-            else
-            {
-                currentActor = new FDatasmithFacadeActor(cleanName);
-            }
+            // All hierarchy nodes are grouping actors. Leaf items with geometry
+            // will get per-fragment ActorMesh children added during Step 2.
+            FDatasmithFacadeActor currentActor = new FDatasmithFacadeActor(cleanName);
 
             currentActor.SetLabel(item.DisplayName ?? item.ClassDisplayName ?? "Element");
             actorsMap[item] = currentActor;

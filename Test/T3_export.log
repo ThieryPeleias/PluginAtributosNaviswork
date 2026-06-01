@@ -1,0 +1,15 @@
+[2026-06-01 14:56:14] =================================================================
+[2026-06-01 14:56:14] Starting Virtuart4D Datasmith Export for: Mauro.nwc
+[2026-06-01 14:56:14] Target File: E:\@Virtuart\Claude\Projetos\Virtuart4DNavisworks\Test\T3.udatasmith
+[2026-06-01 14:56:14] =================================================================
+[2026-06-01 14:56:14] Exporting entire visible models.
+[2026-06-01 14:56:14] Initializing Datasmith Scene Facade...
+[2026-06-01 14:56:14] Step 1/3: Traversing lightweight .NET hierarchy to build actors dictionary...
+[2026-06-01 14:56:15] Step 1 Completed. Created 1150 actors in the hierarchy tree.
+[2026-06-01 14:56:15] Step 2/3: Converting roots to COM selection and processing geometry fragments...
+[2026-06-01 14:56:15] Resolved 348 concrete visible geometry leaf nodes from 1 roots.
+[2026-06-01 14:58:53] Step 2 Completed. Total processed paths: 348. Exported meshes: 345.
+[2026-06-01 14:58:53] Step 3/3: Saving Datasmith scene and finalizing export...
+[2026-06-01 14:58:53] Export completed successfully! Success status: True
+[2026-06-01 14:58:53] Log saved to: E:\@Virtuart\Claude\Projetos\Virtuart4DNavisworks\Test\T3_export.log
+[2026-06-01 14:58:53] =================================================================

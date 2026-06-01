@@ -1,0 +1,3824 @@
+0,00:Collecting garbage
+0,03:Log warmup
+0,03:Start export: E:\@Virtuart\Claude\Projetos\Virtuart4DNavisworks\Test\Plugoriginal\Mauro.udatasmith
+CentimetersPerUnit: 30,48
+View.name: 3dx
+View.name: {3D}
+0,09:Retrieving Model Items
+ModelItemCount=1150
+Node 0: Mauro.nwc
+# IsGroup 
+# Children (8)
+  Node 0: <No level>
+  # IsLayer 
+  # IsGroup 
+  # Children (1)
+    Node 0: Generic Models
+    # IsGroup 
+    # Children (1)
+      Node 0: Rampa com meio_fio para face
+      # IsGroup 
+      # Children (1)
+        Node 0: Rampa com meio_fio para face
+        # IsGroup 
+        # Children (2)
+          Node 0: Rampa com meio_fio para face
+          # IsGroup 
+          # Children (1)
+            Node 0: Rampa com meio_fio para face
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Rampa com meio_fio para face
+              # IsGroup 
+              # Children (1)
+                Node 0: Concrete, Cast In Situ
+                # IsGeometry
+          Node 1: Rampa com meio_fio para face
+          # IsGroup 
+          # Children (1)
+            Node 0: Rampa com meio_fio para face
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Rampa com meio_fio para face
+              # IsGroup 
+              # Children (1)
+                Node 0: Concrete, Cast In Situ
+                # IsGeometry
+  Node 1: 0
+  # IsLayer 
+  # IsGroup 
+  # Children (8)
+    Node 0: Curtain Wall Mullions
+    # IsGroup 
+    # Children (1)
+      Node 0: Rectangular Mullion
+      # IsGroup 
+      # Children (1)
+        Node 0: Telha Colonial
+        # IsGroup 
+        # Children (25)
+          Node 0: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                # IsGeometry
+          Node 1: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                # IsGeometry
+          Node 2: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                # IsGeometry
+          Node 3: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                # IsGeometry
+          Node 4: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                # IsGeometry
+          Node 5: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                # IsGeometry
+          Node 6: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                # IsGeometry
+          Node 7: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                # IsGeometry
+          Node 8: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                # IsGeometry
+          Node 9: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                # IsGeometry
+          Node 10: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                # IsGeometry
+          Node 11: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 12: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 13: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 14: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 15: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 16: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 17: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 18: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 19: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 20: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 21: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 22: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                # IsGeometry
+          Node 23: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                # IsGeometry
+          Node 24: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                # IsGeometry
+    Node 1: Doors
+    # IsGroup 
+    # Children (1)
+      Node 0: M_Single-Flush
+      # IsGroup 
+      # Children (1)
+        Node 0: 0915 x 2134mm 2
+        # IsGroup 
+        # Children (2)
+          Node 0: M_Single-Flush
+          # IsGroup 
+          # Children (1)
+            Node 0: 0915 x 2134mm 2
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: 0915 x 2134mm 2
+              # IsGroup 
+              # Children (2)
+                Node 0: 
+                # IsGeometry
+                Node 1: White Plastic
+                # IsGeometry
+          Node 1: M_Single-Flush
+          # IsGroup 
+          # Children (1)
+            Node 0: 0915 x 2134mm 2
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: 0915 x 2134mm 2
+              # IsGroup 
+              # Children (2)
+                Node 0: 
+                # IsGeometry
+                Node 1: White Plastic
+                # IsGeometry
+    Node 2: Floors
+    # IsGroup 
+    # Children (1)
+      Node 0: Floor
+      # IsGroup 
+      # Children (1)
+        Node 0: Generic 100mm
+        # IsGroup 
+        # Children (1)
+          Node 0: Floor
+          # IsGroup 
+          # Children (1)
+            Node 0: Concrete, Cast In Situ
+            # IsGeometry
+    Node 3: Lighting Fixtures
+    # IsGroup 
+    # Children (1)
+      Node 0: TASK square surface
+      # IsGroup 
+      # Children (1)
+        Node 0: TASK 320 square direct surface, white, 3000 K, 059-2110037K
+        # IsGroup 
+        # Children (2)
+          Node 0: TASK square surface
+          # IsGroup 
+          # Children (1)
+            Node 0: TASK 320 square direct surface, white, 3000 K, 059-2110037K
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: TASK 320 square direct surface, white, 3000 K, 059-2110037K
+              # IsGroup 
+              # Children (2)
+                Node 0: XAL_DIFFUSE
+                # IsGeometry
+                Node 1: XAL_PURE_WHITE
+                # IsGeometry
+          Node 1: TASK square surface
+          # IsGroup 
+          # Children (1)
+            Node 0: TASK 320 square direct surface, white, 3000 K, 059-2110037K
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: TASK 320 square direct surface, white, 3000 K, 059-2110037K
+              !instance
+              # IsGroup 
+              # Children (2)
+                Node 0: XAL_DIFFUSE
+                !instance
+                # IsGeometry
+                Node 1: XAL_PURE_WHITE
+                !instance
+                # IsGeometry
+    Node 4: Roof Soffits
+    # IsGroup 
+    # Children (1)
+      Node 0: Roof Soffit
+      # IsGroup 
+      # Children (2)
+        Node 0: Genérico - 2
+        # IsGroup 
+        # Children (1)
+          Node 0: Roof Soffit
+          # IsGroup 
+          # Children (1)
+            Node 0: Render Material 165-0-0
+            # IsGeometry
+        Node 1: Genérico - 20 mm
+        # IsGroup 
+        # Children (1)
+          Node 0: Roof Soffit
+          # IsGroup 
+          # Children (1)
+            Node 0: Granite
+            # IsGeometry
+    Node 5: Toposolid
+    # IsGroup 
+    # Children (1)
+      Node 0: Toposolid
+      # IsGroup 
+      # Children (2)
+        Node 0: Toposolid 1
+        # IsGroup 
+        # Children (2)
+          Node 0: Toposolid
+          # IsGroup 
+          # Children (1)
+            Node 0: Grass
+            # IsGeometry
+          Node 1: Toposolid
+          # IsGroup 
+          # Children (1)
+            Node 0: Grass
+            # IsGeometry
+        Node 1: Toposolid 2
+        # IsGroup 
+        # Children (1)
+          Node 0: Toposolid
+          # IsGroup 
+          # Children (1)
+            Node 0: Asphalt, Bitumen
+            # IsGeometry
+    Node 6: Walls
+    # IsGroup 
+    # Children (1)
+      Node 0: Basic Wall
+      # IsGroup 
+      # Children (4)
+        Node 0: @Parede - 150mm 9
+        # IsGroup 
+        # Children (2)
+          Node 0: Basic Wall
+          # IsGroup 
+          # Children (3)
+            Node 0: Gypsum Wall Board(1)
+            # IsGeometry
+            Node 1: Gypsum Wall Board
+            # IsGeometry
+            Node 2: Default Wall
+            # IsGeometry
+          Node 1: Basic Wall
+          # IsGroup 
+          # Children (3)
+            Node 0: Gypsum Wall Board
+            # IsGeometry
+            Node 1: Gypsum Wall Board(1)
+            # IsGeometry
+            Node 2: Default Wall
+            # IsGeometry
+        Node 1: @Parede - 150mm 3
+        # IsGroup 
+        # Children (12)
+          Node 0: Basic Wall
+          # IsGroup 
+          # Children (2)
+            Node 0: Gypsum Wall Board
+            # IsGeometry
+            Node 1: Default Wall
+            # IsGeometry
+          Node 1: Basic Wall
+          # IsGroup 
+          # Children (2)
+            Node 0: Gypsum Wall Board
+            # IsGeometry
+            Node 1: Default Wall
+            # IsGeometry
+          Node 2: Basic Wall
+          # IsGroup 
+          # Children (2)
+            Node 0: Gypsum Wall Board
+            # IsGeometry
+            Node 1: Default Wall
+            # IsGeometry
+          Node 3: Basic Wall
+          # IsGroup 
+          # Children (2)
+            Node 0: Gypsum Wall Board
+            # IsGeometry
+            Node 1: Default Wall
+            # IsGeometry
+          Node 4: Basic Wall
+          # IsGroup 
+          # Children (2)
+            Node 0: Gypsum Wall Board
+            # IsGeometry
+            Node 1: Default Wall
+            # IsGeometry
+          Node 5: Basic Wall
+          # IsGroup 
+          # Children (2)
+            Node 0: Gypsum Wall Board
+            # IsGeometry
+            Node 1: Default Wall
+            # IsGeometry
+          Node 6: Basic Wall
+          # IsGroup 
+          # Children (2)
+            Node 0: Gypsum Wall Board
+            # IsGeometry
+            Node 1: Default Wall
+            # IsGeometry
+          Node 7: Basic Wall
+          # IsGroup 
+          # Children (2)
+            Node 0: Gypsum Wall Board
+            # IsGeometry
+            Node 1: Default Wall
+            # IsGeometry
+          Node 8: Basic Wall
+          # IsGroup 
+          # Children (2)
+            Node 0: Gypsum Wall Board
+            # IsGeometry
+            Node 1: Default Wall
+            # IsGeometry
+          Node 9: Basic Wall
+          # IsGroup 
+          # Children (2)
+            Node 0: Gypsum Wall Board
+            # IsGeometry
+            Node 1: Default Wall
+            # IsGeometry
+          Node 10: Basic Wall
+          # IsGroup 
+          # Children (2)
+            Node 0: Gypsum Wall Board
+            # IsGeometry
+            Node 1: Default Wall
+            # IsGeometry
+          Node 11: Basic Wall
+          # IsGroup 
+          # Children (2)
+            Node 0: Gypsum Wall Board
+            # IsGeometry
+            Node 1: Default Wall
+            # IsGeometry
+        Node 2: @Parede - 200mm 2
+        # IsGroup 
+        # Children (2)
+          Node 0: Basic Wall
+          # IsGroup 
+          # Children (3)
+            Node 0: Gypsum Wall Board(1)
+            # IsGeometry
+            Node 1: Gypsum Wall Board
+            # IsGeometry
+            Node 2: Default Wall
+            # IsGeometry
+          Node 1: Basic Wall
+          # IsGroup 
+          # Children (3)
+            Node 0: Gypsum Wall Board
+            # IsGeometry
+            Node 1: Gypsum Wall Board(1)
+            # IsGeometry
+            Node 2: Default Wall
+            # IsGeometry
+        Node 3: Wall Esp Garagem
+        # IsGroup 
+        # Children (8)
+          Node 0: Basic Wall
+          # IsGroup 
+          # Children (1)
+            Node 0: 000B_Cimentado(1)
+            # IsGeometry
+          Node 1: Basic Wall
+          # IsGroup 
+          # Children (1)
+            Node 0: 000B_Cimentado(1)
+            # IsGeometry
+          Node 2: Basic Wall
+          # IsGroup 
+          # Children (1)
+            Node 0: 000B_Cimentado(1)
+            # IsGeometry
+          Node 3: Basic Wall
+          # IsGroup 
+          # Children (1)
+            Node 0: 000B_Cimentado(1)
+            # IsGeometry
+          Node 4: Basic Wall
+          # IsGroup 
+          # Children (1)
+            Node 0: 000B_Cimentado(1)
+            # IsGeometry
+          Node 5: Basic Wall
+          # IsGroup 
+          # Children (1)
+            Node 0: 000B_Cimentado(1)
+            # IsGeometry
+          Node 6: Basic Wall
+          # IsGroup 
+          # Children (1)
+            Node 0: 000B_Cimentado(1)
+            # IsGeometry
+          Node 7: Basic Wall
+          # IsGroup 
+          # Children (1)
+            Node 0: 000B_Cimentado(1)
+            # IsGeometry
+    Node 7: Windows
+    # IsGroup 
+    # Children (1)
+      Node 0: Janela de correr - 2 Painéis
+      # IsGroup 
+      # Children (2)
+        Node 0: Janela de correr - 2 Painéis 1.80-1.10
+        # IsGroup 
+        # Children (2)
+          Node 0: Janela de correr - 2 Painéis
+          # IsGroup 
+          # Children (1)
+            Node 0: Janela de correr - 2 Painéis 1.80-1.10
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Janela de correr - 2 Painéis 1.80-1.10
+              # IsGroup 
+              # Children (2)
+                Node 0: Vidro ou Similar
+                # IsGeometry
+                Node 1: White Plastic
+                # IsGeometry
+          Node 1: Janela de correr - 2 Painéis
+          # IsGroup 
+          # Children (1)
+            Node 0: Janela de correr - 2 Painéis 1.80-1.10
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Janela de correr - 2 Painéis 1.80-1.10
+              !instance
+              # IsGroup 
+              # Children (2)
+                Node 0: Vidro ou Similar
+                !instance
+                # IsGeometry
+                Node 1: White Plastic
+                !instance
+                # IsGeometry
+        Node 1: Janela de correr - 2 Painéis 1.60-1.10
+        # IsGroup 
+        # Children (2)
+          Node 0: Janela de correr - 2 Painéis
+          # IsGroup 
+          # Children (1)
+            Node 0: Janela de correr - 2 Painéis 1.60-1.10
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Janela de correr - 2 Painéis 1.60-1.10
+              # IsGroup 
+              # Children (2)
+                Node 0: Vidro ou Similar
+                # IsGeometry
+                Node 1: White Plastic
+                # IsGeometry
+          Node 1: Janela de correr - 2 Painéis
+          # IsGroup 
+          # Children (1)
+            Node 0: Janela de correr - 2 Painéis 1.60-1.10
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Janela de correr - 2 Painéis 1.60-1.10
+              !instance
+              # IsGroup 
+              # Children (2)
+                Node 0: Vidro ou Similar
+                !instance
+                # IsGeometry
+                Node 1: White Plastic
+                !instance
+                # IsGeometry
+  Node 2: .Level 1
+  # IsLayer 
+  # IsGroup 
+  # Children (9)
+    Node 0: Ceilings
+    # IsGroup 
+    # Children (1)
+      Node 0: Basic Ceiling
+      # IsGroup 
+      # Children (1)
+        Node 0: Generic
+        # IsGroup 
+        # Children (1)
+          Node 0: Basic Ceiling
+          # IsGroup 
+          # Children (1)
+            Node 0: Gypsum Wall Board
+            # IsGeometry
+    Node 1: Curtain Wall Mullions
+    # IsGroup 
+    # Children (1)
+      Node 0: Rectangular Mullion
+      # IsGroup 
+      # Children (1)
+        Node 0: Telha Colonial
+        # IsGroup 
+        # Children (81)
+          Node 0: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                # IsGeometry
+          Node 1: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 2: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 3: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 4: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 5: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 6: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 7: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 8: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 9: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 10: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 11: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 12: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 13: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 14: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 15: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 16: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 17: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 18: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 19: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 20: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 21: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 22: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 23: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 24: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 25: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 26: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 27: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 28: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                # IsGeometry
+          Node 29: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 30: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 31: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 32: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 33: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 34: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 35: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 36: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 37: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 38: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 39: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 40: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 41: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 42: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 43: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 44: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 45: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 46: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 47: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 48: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 49: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 50: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 51: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 52: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 53: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 54: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 55: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 56: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 57: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 58: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 59: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 60: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 61: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 62: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 63: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 64: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 65: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 66: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 67: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 68: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 69: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 70: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 71: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 72: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 73: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 74: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 75: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 76: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 77: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 78: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 79: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 80: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+    Node 2: Doors
+    # IsGroup 
+    # Children (2)
+      Node 0: Porta única sem revestimento
+      # IsGroup 
+      # Children (2)
+        Node 0: 700 x 2100mm
+        # IsGroup 
+        # Children (4)
+          Node 0: Porta única sem revestimento
+          # IsGroup 
+          # Children (1)
+            Node 0: 700 x 2100mm
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: 700 x 2100mm
+              # IsGroup 
+              # Children (1)
+                Node 0: White Plastic
+                # IsGeometry
+          Node 1: Porta única sem revestimento
+          # IsGroup 
+          # Children (1)
+            Node 0: 700 x 2100mm
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: 700 x 2100mm
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: White Plastic
+                !instance
+                # IsGeometry
+          Node 2: Porta única sem revestimento
+          # IsGroup 
+          # Children (1)
+            Node 0: 700 x 2100mm
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: 700 x 2100mm
+              # IsGroup 
+              # Children (1)
+                Node 0: White Plastic
+                # IsGeometry
+          Node 3: Porta única sem revestimento
+          # IsGroup 
+          # Children (1)
+            Node 0: 700 x 2100mm
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: 700 x 2100mm
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: White Plastic
+                !instance
+                # IsGeometry
+        Node 1: 900 x 2100mm 3
+        # IsGroup 
+        # Children (2)
+          Node 0: Porta única sem revestimento
+          # IsGroup 
+          # Children (1)
+            Node 0: 900 x 2100mm 3
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: 900 x 2100mm 3
+              # IsGroup 
+              # Children (1)
+                Node 0: White Plastic
+                # IsGeometry
+          Node 1: Porta única sem revestimento
+          # IsGroup 
+          # Children (1)
+            Node 0: 900 x 2100mm 3
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: 900 x 2100mm 3
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: White Plastic
+                !instance
+                # IsGeometry
+      Node 1: M_Single-Flush
+      # IsGroup 
+      # Children (1)
+        Node 0: 0700 x 2032mm
+        # IsGroup 
+        # Children (1)
+          Node 0: M_Single-Flush
+          # IsGroup 
+          # Children (1)
+            Node 0: 0700 x 2032mm
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: 0700 x 2032mm
+              # IsGroup 
+              # Children (2)
+                Node 0: 
+                # IsGeometry
+                Node 1: White Plastic
+                # IsGeometry
+    Node 3: Floors
+    # IsGroup 
+    # Children (1)
+      Node 0: Floor
+      # IsGroup 
+      # Children (3)
+        Node 0: Generic Floor - 200mm 6
+        # IsGroup 
+        # Children (1)
+          Node 0: Floor
+          # IsGroup 
+          # Children (1)
+            Node 0: Default
+            # IsGeometry
+        Node 1: Generic 100mm
+        # IsGroup 
+        # Children (3)
+          Node 0: Floor
+          # IsGroup 
+          # Children (1)
+            Node 0: Concrete, Cast In Situ
+            # IsGeometry
+          Node 1: Floor
+          # IsGroup 
+          # Children (1)
+            Node 0: Concrete, Cast In Situ
+            # IsGeometry
+          Node 2: Floor
+          # IsGroup 
+          # Children (1)
+            Node 0: Concrete, Cast In Situ
+            # IsGeometry
+        Node 2: Grass
+        # IsGroup 
+        # Children (1)
+          Node 0: Floor
+          # IsGroup 
+          # Children (1)
+            Node 0: Grass
+            # IsGeometry
+    Node 4: Lighting Fixtures
+    # IsGroup 
+    # Children (1)
+      Node 0: HAFELE Lighting Wall Light Square
+      # IsGroup 
+      # Children (1)
+        Node 0: LED WL BK 3W 3000K SQ68X150_821.06.364
+        # IsGroup 
+        # Children (6)
+          Node 0: HAFELE Lighting Wall Light Square
+          # IsGroup 
+          # Children (1)
+            Node 0: LED WL BK 3W 3000K SQ68X150_821.06.364
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: LED WL BK 3W 3000K SQ68X150_821.06.364
+              # IsGroup 
+              # Children (2)
+                Node 0: Linea Light - Matt Plastic - White
+                # IsGeometry
+                Node 1: Steel
+                # IsGeometry
+          Node 1: HAFELE Lighting Wall Light Square
+          # IsGroup 
+          # Children (1)
+            Node 0: LED WL BK 3W 3000K SQ68X150_821.06.364
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: LED WL BK 3W 3000K SQ68X150_821.06.364
+              !instance
+              # IsGroup 
+              # Children (2)
+                Node 0: Linea Light - Matt Plastic - White
+                !instance
+                # IsGeometry
+                Node 1: Steel
+                !instance
+                # IsGeometry
+          Node 2: HAFELE Lighting Wall Light Square
+          # IsGroup 
+          # Children (1)
+            Node 0: LED WL BK 3W 3000K SQ68X150_821.06.364
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: LED WL BK 3W 3000K SQ68X150_821.06.364
+              !instance
+              # IsGroup 
+              # Children (2)
+                Node 0: Linea Light - Matt Plastic - White
+                !instance
+                # IsGeometry
+                Node 1: Steel
+                !instance
+                # IsGeometry
+          Node 3: HAFELE Lighting Wall Light Square
+          # IsGroup 
+          # Children (1)
+            Node 0: LED WL BK 3W 3000K SQ68X150_821.06.364
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: LED WL BK 3W 3000K SQ68X150_821.06.364
+              !instance
+              # IsGroup 
+              # Children (2)
+                Node 0: Linea Light - Matt Plastic - White
+                !instance
+                # IsGeometry
+                Node 1: Steel
+                !instance
+                # IsGeometry
+          Node 4: HAFELE Lighting Wall Light Square
+          # IsGroup 
+          # Children (1)
+            Node 0: LED WL BK 3W 3000K SQ68X150_821.06.364
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: LED WL BK 3W 3000K SQ68X150_821.06.364
+              # IsGroup 
+              # Children (2)
+                Node 0: Linea Light - Matt Plastic - White
+                # IsGeometry
+                Node 1: Steel
+                # IsGeometry
+          Node 5: HAFELE Lighting Wall Light Square
+          # IsGroup 
+          # Children (1)
+            Node 0: LED WL BK 3W 3000K SQ68X150_821.06.364
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: LED WL BK 3W 3000K SQ68X150_821.06.364
+              !instance
+              # IsGroup 
+              # Children (2)
+                Node 0: Linea Light - Matt Plastic - White
+                !instance
+                # IsGeometry
+                Node 1: Steel
+                !instance
+                # IsGeometry
+    Node 5: Planting
+    # IsGroup 
+    # Children (1)
+      Node 0: M_RPC Tree - Deciduous
+      # IsGroup 
+      # Children (1)
+        Node 0: Gray Birch - 3.1 Meters
+        # IsGroup 
+        # Children (1)
+          Node 0: M_RPC Tree - Deciduous
+          # IsGroup 
+          # Children (1)
+            Node 0: Gray Birch - 3.1 Meters
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Gray Birch - 3.1 Meters
+              # IsGroup 
+              # Children (1)
+                Node 0: 
+                # IsGeometry
+    Node 6: Roof Soffits
+    # IsGroup 
+    # Children (1)
+      Node 0: Roof Soffit
+      # IsGroup 
+      # Children (1)
+        Node 0: Genérico - 20 mm
+        # IsGroup 
+        # Children (6)
+          Node 0: Roof Soffit
+          # IsGroup 
+          # Children (1)
+            Node 0: Granite
+            # IsGeometry
+          Node 1: Roof Soffit
+          # IsGroup 
+          # Children (1)
+            Node 0: Granite
+            # IsGeometry
+          Node 2: Roof Soffit
+          # IsGroup 
+          # Children (1)
+            Node 0: Granite
+            # IsGeometry
+          Node 3: Roof Soffit
+          # IsGroup 
+          # Children (1)
+            Node 0: Granite
+            # IsGeometry
+          Node 4: Roof Soffit
+          # IsGroup 
+          # Children (1)
+            Node 0: Granite
+            # IsGeometry
+          Node 5: Roof Soffit
+          # IsGroup 
+          # Children (1)
+            Node 0: Granite
+            # IsGeometry
+    Node 7: Toposolid
+    # IsGroup 
+    # Children (1)
+      Node 0: Toposolid
+      # IsGroup 
+      # Children (2)
+        Node 0: Toposolid 2
+        # IsGroup 
+        # Children (1)
+          Node 0: Toposolid
+          # IsGroup 
+          # Children (1)
+            Node 0: Asphalt, Bitumen
+            # IsGeometry
+        Node 1: Toposolid 1
+        # IsGroup 
+        # Children (1)
+          Node 0: Toposolid
+          # IsGroup 
+          # Children (1)
+            Node 0: Grass
+            # IsGeometry
+    Node 8: Walls
+    # IsGroup 
+    # Children (1)
+      Node 0: Basic Wall
+      # IsGroup 
+      # Children (2)
+        Node 0: Portao
+        # IsGroup 
+        # Children (2)
+          Node 0: Basic Wall
+          # IsGroup 
+          # Children (1)
+            Node 0: White Plastic
+            # IsGeometry
+          Node 1: Basic Wall
+          # IsGroup 
+          # Children (1)
+            Node 0: White Plastic
+            # IsGeometry
+        Node 1: Wall Esp Garagem
+        # IsGroup 
+        # Children (3)
+          Node 0: Basic Wall
+          # IsGroup 
+          # Children (1)
+            Node 0: 000B_Cimentado(1)
+            # IsGeometry
+          Node 1: Basic Wall
+          # IsGroup 
+          # Children (1)
+            Node 0: 000B_Cimentado(1)
+            # IsGeometry
+          Node 2: Basic Wall
+          # IsGroup 
+          # Children (1)
+            Node 0: 000B_Cimentado(1)
+            # IsGeometry
+  Node 3: .Level 0.15
+  # IsLayer 
+  # IsGroup 
+  # Children (1)
+    Node 0: Floors
+    # IsGroup 
+    # Children (1)
+      Node 0: Floor
+      # IsGroup 
+      # Children (1)
+        Node 0: .Piso Porcelanato 50x50cm + Regularização
+        # IsGroup 
+        # Children (1)
+          Node 0: Floor
+          # IsGroup 
+          # Children (2)
+            Node 0: Contrapiso
+            # IsGeometry
+            Node 1: REVE.CEXT PASTILHA EM PORCELANA DE 5x5CM
+            # IsGeometry
+  Node 4: .Level 2
+  # IsLayer 
+  # IsGroup 
+  # Children (6)
+    Node 0: Doors
+    # IsGroup 
+    # Children (2)
+      Node 0: Porta única sem revestimento
+      # IsGroup 
+      # Children (2)
+        Node 0: 700 x 2100mm
+        # IsGroup 
+        # Children (4)
+          Node 0: Porta única sem revestimento
+          # IsGroup 
+          # Children (1)
+            Node 0: 700 x 2100mm
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: 700 x 2100mm
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: White Plastic
+                !instance
+                # IsGeometry
+          Node 1: Porta única sem revestimento
+          # IsGroup 
+          # Children (1)
+            Node 0: 700 x 2100mm
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: 700 x 2100mm
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: White Plastic
+                !instance
+                # IsGeometry
+          Node 2: Porta única sem revestimento
+          # IsGroup 
+          # Children (1)
+            Node 0: 700 x 2100mm
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: 700 x 2100mm
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: White Plastic
+                !instance
+                # IsGeometry
+          Node 3: Porta única sem revestimento
+          # IsGroup 
+          # Children (1)
+            Node 0: 700 x 2100mm
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: 700 x 2100mm
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: White Plastic
+                !instance
+                # IsGeometry
+        Node 1: 600 x 2100mm
+        # IsGroup 
+        # Children (4)
+          Node 0: Porta única sem revestimento
+          # IsGroup 
+          # Children (1)
+            Node 0: 600 x 2100mm
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: 600 x 2100mm
+              # IsGroup 
+              # Children (1)
+                Node 0: White Plastic
+                # IsGeometry
+          Node 1: Porta única sem revestimento
+          # IsGroup 
+          # Children (1)
+            Node 0: 600 x 2100mm
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: 600 x 2100mm
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: White Plastic
+                !instance
+                # IsGeometry
+          Node 2: Porta única sem revestimento
+          # IsGroup 
+          # Children (1)
+            Node 0: 600 x 2100mm
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: 600 x 2100mm
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: White Plastic
+                !instance
+                # IsGeometry
+          Node 3: Porta única sem revestimento
+          # IsGroup 
+          # Children (1)
+            Node 0: 600 x 2100mm
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: 600 x 2100mm
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: White Plastic
+                !instance
+                # IsGeometry
+      Node 1: Porta de correr dupla envidraçada com revestimento1
+      # IsGroup 
+      # Children (1)
+        Node 0: 1800 x 2180mm
+        # IsGroup 
+        # Children (2)
+          Node 0: Porta de correr dupla envidraçada com revestimento1
+          # IsGroup 
+          # Children (1)
+            Node 0: 1800 x 2180mm
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: 1800 x 2180mm
+              # IsGroup 
+              # Children (2)
+                Node 0: White Plastic
+                # IsGeometry
+                Node 1: Vidro ou Similar
+                # IsGeometry
+          Node 1: Porta de correr dupla envidraçada com revestimento1
+          # IsGroup 
+          # Children (1)
+            Node 0: 1800 x 2180mm
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: 1800 x 2180mm
+              !instance
+              # IsGroup 
+              # Children (2)
+                Node 0: White Plastic
+                !instance
+                # IsGeometry
+                Node 1: Vidro ou Similar
+                !instance
+                # IsGeometry
+    Node 1: Floors
+    # IsGroup 
+    # Children (1)
+      Node 0: Floor
+      # IsGroup 
+      # Children (2)
+        Node 0: .Piso Porcelanato 50x50cm + Regularização
+        # IsGroup 
+        # Children (1)
+          Node 0: Floor
+          # IsGroup 
+          # Children (2)
+            Node 0: Contrapiso
+            # IsGeometry
+            Node 1: REVE.CEXT PASTILHA EM PORCELANA DE 5x5CM
+            # IsGeometry
+        Node 1: .Piso Porcelanato 50x50cm + Regularização 2
+        # IsGroup 
+        # Children (2)
+          Node 0: Floor
+          # IsGroup 
+          # Children (2)
+            Node 0: Contrapiso
+            # IsGeometry
+            Node 1: REVE.CEXT PASTILHA EM PORCELANA DE 5x5CM
+            # IsGeometry
+          Node 1: Floor
+          # IsGroup 
+          # Children (2)
+            Node 0: Contrapiso
+            # IsGeometry
+            Node 1: REVE.CEXT PASTILHA EM PORCELANA DE 5x5CM
+            # IsGeometry
+    Node 2: Lighting Fixtures
+    # IsGroup 
+    # Children (1)
+      Node 0: HAFELE Lighting Wall Light Square
+      # IsGroup 
+      # Children (1)
+        Node 0: LED WL BK 3W 3000K SQ68X150_821.06.364
+        # IsGroup 
+        # Children (4)
+          Node 0: HAFELE Lighting Wall Light Square
+          # IsGroup 
+          # Children (1)
+            Node 0: LED WL BK 3W 3000K SQ68X150_821.06.364
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: LED WL BK 3W 3000K SQ68X150_821.06.364
+              !instance
+              # IsGroup 
+              # Children (2)
+                Node 0: Linea Light - Matt Plastic - White
+                !instance
+                # IsGeometry
+                Node 1: Steel
+                !instance
+                # IsGeometry
+          Node 1: HAFELE Lighting Wall Light Square
+          # IsGroup 
+          # Children (1)
+            Node 0: LED WL BK 3W 3000K SQ68X150_821.06.364
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: LED WL BK 3W 3000K SQ68X150_821.06.364
+              !instance
+              # IsGroup 
+              # Children (2)
+                Node 0: Linea Light - Matt Plastic - White
+                !instance
+                # IsGeometry
+                Node 1: Steel
+                !instance
+                # IsGeometry
+          Node 2: HAFELE Lighting Wall Light Square
+          # IsGroup 
+          # Children (1)
+            Node 0: LED WL BK 3W 3000K SQ68X150_821.06.364
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: LED WL BK 3W 3000K SQ68X150_821.06.364
+              !instance
+              # IsGroup 
+              # Children (2)
+                Node 0: Linea Light - Matt Plastic - White
+                !instance
+                # IsGeometry
+                Node 1: Steel
+                !instance
+                # IsGeometry
+          Node 3: HAFELE Lighting Wall Light Square
+          # IsGroup 
+          # Children (1)
+            Node 0: LED WL BK 3W 3000K SQ68X150_821.06.364
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: LED WL BK 3W 3000K SQ68X150_821.06.364
+              !instance
+              # IsGroup 
+              # Children (2)
+                Node 0: Linea Light - Matt Plastic - White
+                !instance
+                # IsGeometry
+                Node 1: Steel
+                !instance
+                # IsGeometry
+    Node 3: Railings
+    # IsGroup 
+    # Children (1)
+      Node 0: Railing
+      # IsGroup 
+      # Children (1)
+        Node 0: Commercial - Glass w Fixings
+        # IsGroup 
+        # Children (2)
+          Node 0: Railing
+          # IsGroup 
+          # Children (1)
+            Node 0: Railing
+            # IsInsert 
+            # IsGroup 
+            # Children (11)
+              Node 0: Railing
+              # IsGroup 
+              # Children (1)
+                Node 0: Metal - Steel
+                # IsGeometry
+              Node 1: Glass Panel w fixings
+              # IsInsert 
+              # IsGroup 
+              # Children (1)
+                Node 0: Glass Panel w fixings
+                # IsGroup 
+                # Children (2)
+                  Node 0: Metal - Steel
+                  # IsGeometry
+                  Node 1: Glass
+                  # IsGeometry
+              Node 2: 8 x 35mm
+              # IsInsert 
+              # IsGroup 
+              # Children (1)
+                Node 0: 8 x 35mm
+                # IsGroup 
+                # Children (1)
+                  Node 0: 
+                  # IsGeometry
+              Node 3: 8 x 35mm
+              # IsInsert 
+              # IsGroup 
+              # Children (1)
+                Node 0: 8 x 35mm
+                !instance
+                # IsGroup 
+                # Children (1)
+                  Node 0: 
+                  !instance
+                  # IsGeometry
+              Node 4: Glass Panel w fixings
+              # IsInsert 
+              # IsGroup 
+              # Children (1)
+                Node 0: Glass Panel w fixings
+                !instance
+                # IsGroup 
+                # Children (2)
+                  Node 0: Metal - Steel
+                  !instance
+                  # IsGeometry
+                  Node 1: Glass
+                  !instance
+                  # IsGeometry
+              Node 5: 8 x 35mm
+              # IsInsert 
+              # IsGroup 
+              # Children (1)
+                Node 0: 8 x 35mm
+                !instance
+                # IsGroup 
+                # Children (1)
+                  Node 0: 
+                  !instance
+                  # IsGeometry
+              Node 6: Glass Panel w fixings
+              # IsInsert 
+              # IsGroup 
+              # Children (1)
+                Node 0: Glass Panel w fixings
+                !instance
+                # IsGroup 
+                # Children (2)
+                  Node 0: Metal - Steel
+                  !instance
+                  # IsGeometry
+                  Node 1: Glass
+                  !instance
+                  # IsGeometry
+              Node 7: 8 x 35mm
+              # IsInsert 
+              # IsGroup 
+              # Children (1)
+                Node 0: 8 x 35mm
+                !instance
+                # IsGroup 
+                # Children (1)
+                  Node 0: 
+                  !instance
+                  # IsGeometry
+              Node 8: Glass Panel w fixings
+              # IsInsert 
+              # IsGroup 
+              # Children (1)
+                Node 0: Glass Panel w fixings
+                !instance
+                # IsGroup 
+                # Children (2)
+                  Node 0: Metal - Steel
+                  !instance
+                  # IsGeometry
+                  Node 1: Glass
+                  !instance
+                  # IsGeometry
+              Node 9: 8 x 35mm
+              # IsInsert 
+              # IsGroup 
+              # Children (1)
+                Node 0: 8 x 35mm
+                !instance
+                # IsGroup 
+                # Children (1)
+                  Node 0: 
+                  !instance
+                  # IsGeometry
+              Node 10: 8 x 35mm
+              # IsInsert 
+              # IsGroup 
+              # Children (1)
+                Node 0: 8 x 35mm
+                !instance
+                # IsGroup 
+                # Children (1)
+                  Node 0: 
+                  !instance
+                  # IsGeometry
+          Node 1: Railing
+          # IsGroup 
+          # Children (1)
+            Node 0: Railing
+            # IsInsert 
+            # IsGroup 
+            # Children (11)
+              Node 0: Railing
+              # IsGroup 
+              # Children (1)
+                Node 0: Metal - Steel
+                # IsGeometry
+              Node 1: Glass Panel w fixings
+              # IsInsert 
+              # IsGroup 
+              # Children (1)
+                Node 0: Glass Panel w fixings
+                !instance
+                # IsGroup 
+                # Children (2)
+                  Node 0: Metal - Steel
+                  !instance
+                  # IsGeometry
+                  Node 1: Glass
+                  !instance
+                  # IsGeometry
+              Node 2: 8 x 35mm
+              # IsInsert 
+              # IsGroup 
+              # Children (1)
+                Node 0: 8 x 35mm
+                !instance
+                # IsGroup 
+                # Children (1)
+                  Node 0: 
+                  !instance
+                  # IsGeometry
+              Node 3: 8 x 35mm
+              # IsInsert 
+              # IsGroup 
+              # Children (1)
+                Node 0: 8 x 35mm
+                !instance
+                # IsGroup 
+                # Children (1)
+                  Node 0: 
+                  !instance
+                  # IsGeometry
+              Node 4: Glass Panel w fixings
+              # IsInsert 
+              # IsGroup 
+              # Children (1)
+                Node 0: Glass Panel w fixings
+                !instance
+                # IsGroup 
+                # Children (2)
+                  Node 0: Metal - Steel
+                  !instance
+                  # IsGeometry
+                  Node 1: Glass
+                  !instance
+                  # IsGeometry
+              Node 5: 8 x 35mm
+              # IsInsert 
+              # IsGroup 
+              # Children (1)
+                Node 0: 8 x 35mm
+                !instance
+                # IsGroup 
+                # Children (1)
+                  Node 0: 
+                  !instance
+                  # IsGeometry
+              Node 6: Glass Panel w fixings
+              # IsInsert 
+              # IsGroup 
+              # Children (1)
+                Node 0: Glass Panel w fixings
+                !instance
+                # IsGroup 
+                # Children (2)
+                  Node 0: Metal - Steel
+                  !instance
+                  # IsGeometry
+                  Node 1: Glass
+                  !instance
+                  # IsGeometry
+              Node 7: 8 x 35mm
+              # IsInsert 
+              # IsGroup 
+              # Children (1)
+                Node 0: 8 x 35mm
+                !instance
+                # IsGroup 
+                # Children (1)
+                  Node 0: 
+                  !instance
+                  # IsGeometry
+              Node 8: Glass Panel w fixings
+              # IsInsert 
+              # IsGroup 
+              # Children (1)
+                Node 0: Glass Panel w fixings
+                !instance
+                # IsGroup 
+                # Children (2)
+                  Node 0: Metal - Steel
+                  !instance
+                  # IsGeometry
+                  Node 1: Glass
+                  !instance
+                  # IsGeometry
+              Node 9: 8 x 35mm
+              # IsInsert 
+              # IsGroup 
+              # Children (1)
+                Node 0: 8 x 35mm
+                !instance
+                # IsGroup 
+                # Children (1)
+                  Node 0: 
+                  !instance
+                  # IsGeometry
+              Node 10: 8 x 35mm
+              # IsInsert 
+              # IsGroup 
+              # Children (1)
+                Node 0: 8 x 35mm
+                !instance
+                # IsGroup 
+                # Children (1)
+                  Node 0: 
+                  !instance
+                  # IsGeometry
+    Node 4: Walls
+    # IsGroup 
+    # Children (1)
+      Node 0: Basic Wall
+      # IsGroup 
+      # Children (2)
+        Node 0: @Parede - 150mm 3
+        # IsGroup 
+        # Children (8)
+          Node 0: Basic Wall
+          # IsGroup 
+          # Children (2)
+            Node 0: Gypsum Wall Board
+            # IsGeometry
+            Node 1: Default Wall
+            # IsGeometry
+          Node 1: Basic Wall
+          # IsGroup 
+          # Children (2)
+            Node 0: Gypsum Wall Board
+            # IsGeometry
+            Node 1: Default Wall
+            # IsGeometry
+          Node 2: Basic Wall
+          # IsGroup 
+          # Children (2)
+            Node 0: Gypsum Wall Board
+            # IsGeometry
+            Node 1: Default Wall
+            # IsGeometry
+          Node 3: Basic Wall
+          # IsGroup 
+          # Children (2)
+            Node 0: Gypsum Wall Board
+            # IsGeometry
+            Node 1: Default Wall
+            # IsGeometry
+          Node 4: Basic Wall
+          # IsGroup 
+          # Children (2)
+            Node 0: Gypsum Wall Board
+            # IsGeometry
+            Node 1: Default Wall
+            # IsGeometry
+          Node 5: Basic Wall
+          # IsGroup 
+          # Children (2)
+            Node 0: Gypsum Wall Board
+            # IsGeometry
+            Node 1: Default Wall
+            # IsGeometry
+          Node 6: Basic Wall
+          # IsGroup 
+          # Children (2)
+            Node 0: Gypsum Wall Board
+            # IsGeometry
+            Node 1: Default Wall
+            # IsGeometry
+          Node 7: Basic Wall
+          # IsGroup 
+          # Children (2)
+            Node 0: Gypsum Wall Board
+            # IsGeometry
+            Node 1: Default Wall
+            # IsGeometry
+        Node 1: @Parede - 100mm
+        # IsGroup 
+        # Children (2)
+          Node 0: Basic Wall
+          # IsGroup 
+          # Children (2)
+            Node 0: Gypsum Wall Board
+            # IsGeometry
+            Node 1: Default Wall
+            # IsGeometry
+          Node 1: Basic Wall
+          # IsGroup 
+          # Children (2)
+            Node 0: Gypsum Wall Board
+            # IsGeometry
+            Node 1: Default Wall
+            # IsGeometry
+    Node 5: Windows
+    # IsGroup 
+    # Children (2)
+      Node 0: Janela de correr - 2 Painéis
+      # IsGroup 
+      # Children (1)
+        Node 0: Janela de correr - 2 Painéis 1.60-1.10
+        # IsGroup 
+        # Children (2)
+          Node 0: Janela de correr - 2 Painéis
+          # IsGroup 
+          # Children (1)
+            Node 0: Janela de correr - 2 Painéis 1.60-1.10
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Janela de correr - 2 Painéis 1.60-1.10
+              # IsGroup 
+              # Children (2)
+                Node 0: Vidro ou Similar
+                # IsGeometry
+                Node 1: White Plastic
+                # IsGeometry
+          Node 1: Janela de correr - 2 Painéis
+          # IsGroup 
+          # Children (1)
+            Node 0: Janela de correr - 2 Painéis 1.60-1.10
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Janela de correr - 2 Painéis 1.60-1.10
+              !instance
+              # IsGroup 
+              # Children (2)
+                Node 0: Vidro ou Similar
+                !instance
+                # IsGeometry
+                Node 1: White Plastic
+                !instance
+                # IsGeometry
+      Node 1: M_Fixed
+      # IsGroup 
+      # Children (1)
+        Node 0: 0700 x 05
+        # IsGroup 
+        # Children (2)
+          Node 0: M_Fixed
+          # IsGroup 
+          # Children (1)
+            Node 0: 0700 x 05
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: 0700 x 05
+              # IsGroup 
+              # Children (2)
+                Node 0: Vidro ou Similar
+                # IsGeometry
+                Node 1: White Plastic
+                # IsGeometry
+          Node 1: M_Fixed
+          # IsGroup 
+          # Children (1)
+            Node 0: 0700 x 05
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: 0700 x 05
+              !instance
+              # IsGroup 
+              # Children (2)
+                Node 0: Vidro ou Similar
+                !instance
+                # IsGeometry
+                Node 1: White Plastic
+                !instance
+                # IsGeometry
+  Node 5: .Laje
+  # IsLayer 
+  # IsGroup 
+  # Children (1)
+    Node 0: Floors
+    # IsGroup 
+    # Children (1)
+      Node 0: Floor
+      # IsGroup 
+      # Children (1)
+        Node 0: Generic 100mm
+        # IsGroup 
+        # Children (1)
+          Node 0: Floor
+          # IsGroup 
+          # Children (1)
+            Node 0: Concrete, Cast In Situ
+            # IsGeometry
+  Node 6: .Base Telhado
+  # IsLayer 
+  # IsGroup 
+  # Children (1)
+    Node 0: Curtain Wall Mullions
+    # IsGroup 
+    # Children (1)
+      Node 0: Rectangular Mullion
+      # IsGroup 
+      # Children (1)
+        Node 0: Telha Colonial
+        # IsGroup 
+        # Children (44)
+          Node 0: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 1: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 2: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 3: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 4: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 5: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 6: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 7: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 8: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 9: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 10: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 11: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 12: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 13: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 14: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 15: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 16: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 17: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 18: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 19: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 20: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 21: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 22: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 23: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 24: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 25: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 26: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 27: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 28: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 29: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 30: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 31: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 32: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 33: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 34: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 35: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 36: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 37: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 38: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 39: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 40: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 41: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 42: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+          Node 43: Rectangular Mullion
+          # IsGroup 
+          # Children (1)
+            Node 0: Telha Colonial
+            # IsInsert 
+            # IsGroup 
+            # Children (1)
+              Node 0: Telha Colonial
+              !instance
+              # IsGroup 
+              # Children (1)
+                Node 0: Telha
+                !instance
+                # IsGeometry
+  Node 7: .Cobertura Telhado
+  # IsLayer 
+  # IsGroup 
+  # Children (1)
+    Node 0: Floors
+    # IsGroup 
+    # Children (1)
+      Node 0: Floor
+      # IsGroup 
+      # Children (1)
+        Node 0: Granito
+        # IsGroup 
+        # Children (3)
+          Node 0: Floor
+          # IsGroup 
+          # Children (1)
+            Node 0: Granite
+            # IsGeometry
+          Node 1: Floor
+          # IsGroup 
+          # Children (1)
+            Node 0: Granite
+            # IsGeometry
+          Node 2: Floor
+          # IsGroup 
+          # Children (1)
+            Node 0: Granite
+            # IsGeometry
+GeometryInstanceTotalCount=197
+GroupInstanceTotalCount=176
+HiddenNodeCount=0
+GeometryNodeCount=348
+GroupNodeCount=802
+InsertNodeCount=214
+LayerNodeCount=8
+Collected Nodes count=1150
+0,12:Done - Retrieving Model Items
+0,12:Extracting Geometry
+SceneContext.Appearances.Count=21
+    Appearance: Granite 0,3137255, 0,3137255, 0,3137255, 0,3137255, 0,3137255, 0,3137255, 0, 0, 0, 0, 0, 0, 0,5, 0
+    Appearance: Telha 0,7019608, 0,227451, 0,1764706, 0,7019608, 0,227451, 0,1764706, 0, 0, 0, 0, 0, 0, 0,5, 0
+    Appearance: Concrete, Cast In Situ 0,7529412, 0,7529412, 0,7529412, 0,7529412, 0,7529412, 0,7529412, 0, 0, 0, 0, 0, 0, 1, 0
+    Appearance: White Plastic 0,9098039, 0,9098039, 0,9098039, 0,9098039, 0,9098039, 0,9098039, 0, 0, 0, 0, 0, 0, 0,5, 0
+    Appearance: Vidro ou Similar 0,372549, 0,6862745, 0,6862745, 0,372549, 0,6862745, 0,6862745, 0, 0, 0, 0, 0, 0, 0,5, 0,7
+    Appearance: Default Wall 0,5019608, 0,5019608, 0,5019608, 0,5019608, 0,5019608, 0,5019608, 0, 0, 0, 0, 0, 0, 0,5, 0
+    Appearance: Gypsum Wall Board 0,8941177, 0,8941177, 0,8941177, 0,8941177, 0,8941177, 0,8941177, 0, 0, 0, 0, 0, 0, 1, 0
+    Appearance:  1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1E-05, 0
+    Appearance: Glass 0, 0,7490196, 0,4705882, 0, 0,7490196, 0,4705882, 0, 0, 0, 0, 0, 0, 0,09375, 0,9
+    Appearance: Metal - Steel 0,7803922, 0,7803922, 0,7803922, 0,7803922, 0,7803922, 0,7803922, 0, 0, 0, 0, 0, 0, 0,5, 0
+    Appearance: Steel 0,8784314, 0,8745098, 0,8588235, 0,8784314, 0,8745098, 0,8588235, 0, 0, 0, 0, 0, 0, 1E-05, 0
+    Appearance: Linea Light - Matt Plastic - White 0,9411765, 0,9411765, 0,9411765, 0,9411765, 0,9411765, 0,9411765, 0, 0, 0, 0, 0, 0, 0,5, 0
+    Appearance: REVE.CEXT PASTILHA EM PORCELANA DE 5x5CM 0,945098, 0,9333333, 0,8784314, 0,945098, 0,9333333, 0,8784314, 0, 0, 0, 0, 0, 0, 0,5, 0
+    Appearance: Contrapiso 0,4980392, 0,4980392, 0,4980392, 0,4980392, 0,4980392, 0,4980392, 0, 0, 0, 0, 0, 0, 0,5, 0
+    Appearance: 000B_Cimentado(1) 0,4, 0,4, 0,4, 0,4, 0,4, 0,4, 0, 0, 0, 0, 0, 0, 0,5, 0
+    Appearance: Grass 0,3686275, 0,7019608, 0,2078431, 0,3686275, 0,7019608, 0,2078431, 0, 0, 0, 0, 0, 0, 0,5, 0
+    Appearance: Asphalt, Bitumen 0,6078432, 0,6078432, 0,6078432, 0,6078432, 0,6078432, 0,6078432, 0, 0, 0, 0, 0, 0, 1, 0
+    Appearance: Gypsum Wall Board(1) 1, 0,5019608, 1, 1, 0,5019608, 1, 0, 0, 0, 0, 0, 0, 0,5, 0
+    Appearance: Render Material 165-0-0 1, 0,5019608, 0,5019608, 1, 0,5019608, 0,5019608, 0, 0, 0, 0, 0, 0, 0,5, 0
+    Appearance: XAL_PURE_WHITE 0,945098, 0,9254902, 0,8823529, 0,945098, 0,9254902, 0,8823529, 0, 0, 0, 0, 0, 0, 0,5, 0
+    Appearance: XAL_DIFFUSE 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,5, 0
+MultipleFragmentGeometryWithDistinctTransform=1
+MultipleFragmentGeometryWithDistinctTransformFragmentCount=2
+MultipleFragmentGeometryWithSameTransform=4
+MultipleFragmentGeometryWithSameTransformFragmentCount=8
+MultipleFragmentGeometryWithDistinctAppearance=0
+MultipleFragmentGeometryWithDistinctAppearanceFragmentCount=0
+MultipleFragmentGeometryWithSameAppearance=5
+MultipleFragmentGeometryWithSameAppearanceFragmentCount=10
+IdenticalItemReused=5
+0,16:Done - Extracting Geometry
+0,16:Geometry Allocation Stats:
+  GeometryCount=153
+  TriangleCount=23034
+  VertexCount=69102
+  CoordBytesUsed=1658448
+  NormalBytesUsed=829224
+  UvBytesUsed=552816
+  IndexBytesUsed=276408
+  CoordBytesReserved=1793088
+  NormalBytesReserved=896544
+  UvBytesReserved=597696
+  IndexBytesReserved=296152
+  *TotalMemoryReserved=3583480
+  *TotalMemoryUsed=3316896
+  *ExpectedMemoryUsed=3316896
+0,16:Preparing Merged Meshes
+Merge max depth: 3
+0,17:Done - Preparing Merged Meshes
+0,17:Geometry Allocation Stats:
+  GeometryCount=153
+  TriangleCount=23034
+  VertexCount=69102
+  CoordBytesUsed=1658448
+  NormalBytesUsed=829224
+  UvBytesUsed=552816
+  IndexBytesUsed=276408
+  CoordBytesReserved=1793088
+  NormalBytesReserved=896544
+  UvBytesReserved=597696
+  IndexBytesReserved=296152
+  *TotalMemoryReserved=3583480
+  *TotalMemoryUsed=3316896
+  *ExpectedMemoryUsed=3316896
+0,17:Optimizing Intermediate scene
+0,17:Done - Optimizing Intermediate scene
+0,17:Creating Meshes
+0,17:Done - CollectGeometryInstancesForNodeTree
+0,17:Creating Datasmith Meshes
+Meshes for single fragments:27
+TotalSingleFragmentsInstanced: 73
+0,24:Done - Creating Datasmith Meshes
+0,24:Creating Merged Datasmith Meshes
+Meshes with multiple fragments:22
+TotalBakedMeshTriangles: 10890
+TotalBakedMeshInstances: 35
+TotalMergedMeshInstances: 100
+TotalMeshSectionCount: 102
+TotalMeshSectionInstancedCount: 246
+0,36:Done Creating Merged Datasmith Meshes
+0,36:Done - Creating Meshes
+0,36:Geometry Allocation Stats:
+  GeometryCount=23
+  TriangleCount=8763
+  VertexCount=26289
+  CoordBytesUsed=630936
+  NormalBytesUsed=315468
+  UvBytesUsed=210312
+  IndexBytesUsed=105156
+  CoordBytesReserved=765576
+  NormalBytesReserved=382788
+  UvBytesReserved=255192
+  IndexBytesReserved=124900
+  *TotalMemoryReserved=1528456
+  *TotalMemoryUsed=1261872
+  *ExpectedMemoryUsed=1261872
+0,36:Creating Actors
+0,36:Done - Creating Actors
+0,36:Set Actor Transforms
+0,37:Done - Set Actor Transforms
+0,37:Building Scene Hierarchy
+0,37:Done - Building Scene Hierarchy
+0,37:Reading Metadata
+0,62:Done - Reading Metadata
+DuplicateMeshCount=3
+Created Datasmith Scene with 28 Actors, 208 Meshes, Unique 64 Meshes, 25985 TotalTriangleCount (VertexCount 77955, Materials 22)
+0,62:Saving Datasmith scene
+0,65:Done - Saving Datasmith scene

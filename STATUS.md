@@ -1,6 +1,4 @@
-# Virtuart4D Navisworks Datasmith Exporter - Handoff & Status Report
-
-This document summarizes the current state of the project, details the architectural changes made to fix the empty mesh/visibility bugs, documents the active diagnostic loop regarding performance and file sizes, and establishes strict guidelines for next steps.
+# Virtuart4D Navisworks Datasmith Exporter - Status Report
 
 ---
 
@@ -14,31 +12,52 @@ This document summarizes the current state of the project, details the architect
 
 ---
 
-## 2. Active Diagnostic Loop (Performance & File Size Bloat)
+## 2. Architecture Change: Fragment-Level Export (Current)
 
-Despite successful compilation and deployment, the custom exporter is currently stuck in a **performance loop**:
-- **The Issue:** `T8.udatasmith` yielded the same slow export speed (~2m 40s) and bloated file size (~12.9 MB udatasmith file) as `T5`.
-- **Active Diagnostic Findings:**
-  1. **SafeArray CopyTo Optimization:** We successfully optimized the hot-path vertex loop in `DatasmithGeometryCallback.cs` by replacing millions of slow COM `GetValue` reflection calls with fast, native `Array.CopyTo` memory copies. This successfully optimized the CPU coordinate retrieval.
-  2. **COM API Performance Bottleneck:** The primary bottleneck is the legacy Navisworks COM API itself. When we call `frag.GenerateSimplePrimitives(...)` on leaf paths that contain many fragments (e.g., roof tiles `Telha` which have 100 fragments each), the COM marshalling loop takes approximately 1.5 to 2 seconds per leaf node, resulting in the overall export delay.
-  3. **Vertex & Triangle Deduplication:** We implemented structural world-space deduplication using `VertexKey` and `TriangleKey` hashing inside the callback. While this merges duplicate/adjacent vertices to optimize `.udsmesh` sizes, it does not reduce the number of paths/fragments processed.
+### Problem (Previous Architecture)
+The previous approach (T5-T8 exports) merged all fragments of each leaf item into a single world-baked mesh, resulting in:
+- ~345 unique meshes with only ~348 ActorMesh instances
+- ~2m40s export time due to vertex-level matrix baking + deduplication per fragment
+- Each mesh was unique (no reuse possible since vertices were world-baked)
+
+### Root Cause Analysis
+Comparing our T8 output with the original Epic Games Datasmith exporter's T7 output revealed:
+
+| Metric | T7 (Original) | T8 (Our Old) |
+|--------|---------------|---------------|
+| StaticMesh definitions | 147 | 345 |
+| ActorMesh instances | 11,215 | 348 |
+| Architecture | Per-fragment ActorMesh with transform | World-baked single mesh per leaf |
+
+### Solution (New Architecture)
+Adopted the same fragment-level architecture as the original Epic Games plugin:
+
+1. **All hierarchy nodes** (including leaf geometry items) are `FDatasmithFacadeActor` grouping parents
+2. **Each fragment** becomes a child `FDatasmithFacadeActorMesh` with:
+   - Geometry in **local/fragment space** (no matrix multiplication, just coordinate conversion)
+   - Fragment transform **decomposed** into translation + quaternion + scale on the ActorMesh node
+3. Eliminates per-vertex matrix multiplication (the hot-path bottleneck)
+4. Produces many lightweight ActorMesh nodes instead of few heavy merged meshes
+
+### Files Changed
+- `DatasmithExporterService.cs` — Fragment-level export pipeline, per-fragment ActorMesh creation
+- `DatasmithGeometryCallback.cs` — Local-space mode, matrix decomposition utility
+- `Agent.md` — Updated section 4 to document new architecture
 
 ---
 
-## 3. Strict Architectural Directive (Structure & Placement)
+## 3. Active Code Base Reference Links
 
-> [!WARNING]
-> **CRITICAL RULE:** Under no circumstances should we restructure the scene graph hierarchy or modify coordinate transformations to solve the performance loop.
-> - **Tree Hierarchy:** Grouping parent nodes must map to `FDatasmithFacadeActor`, and concrete leaf geometry nodes must map to `FDatasmithFacadeActorMesh`.
-> - **Spatial Placement:** World-space coordinates must be baked directly into the vertices in C# using `frag.GetLocalToWorldMatrix()` inside `DatasmithGeometryCallback.cs`, leaving actors with the identity transform.
-> - **Rationale:** This specific configuration guarantees a 100% correct scene tree structure and precise spatial placement inside Unreal Engine. Restructuring or decomposing matrices breaks the positioning and centers meshes at the origin.
-
----
-
-## 4. Active Code Base Reference Links
-
-- **Core Exporter Service:** [DatasmithExporterService.cs](file:///e:/@Virtuart/Claude/Projetos/Virtuart4DNavisworks/DatasmithExporterService.cs) — Hierarchy traversal, Selection Expansion, and Datasmith Facade SDK integration.
-- **Geometry Callback Handler:** [DatasmithGeometryCallback.cs](file:///e:/@Virtuart/Claude/Projetos/Virtuart4DNavisworks/DatasmithGeometryCallback.cs) — Coordinates extraction, scaling, Y-axis inversion, and SafeArray `CopyTo` optimizations.
+- **Core Exporter Service:** [DatasmithExporterService.cs](file:///e:/@Virtuart/Claude/Projetos/Virtuart4DNavisworks/DatasmithExporterService.cs) — Fragment-level hierarchy traversal, per-fragment mesh export, transform decomposition.
+- **Geometry Callback Handler:** [DatasmithGeometryCallback.cs](file:///e:/@Virtuart/Claude/Projetos/Virtuart4DNavisworks/DatasmithGeometryCallback.cs) — Local-space + world-space modes, matrix decomposition, coordinate conversion.
 - **Ribbon UI and Saves Handler:** [Virtuart4DPlugin.cs](file:///e:/@Virtuart/Claude/Projetos/Virtuart4DNavisworks/Virtuart4DPlugin.cs) — Controls Ribbon creation and invokes the file saving dialog.
 - **Project Structure:** [Virtuart4DNavisworks.csproj](file:///e:/@Virtuart/Claude/Projetos/Virtuart4DNavisworks/Virtuart4DNavisworks.csproj) — Defines Net48 dependencies and references.
 - **Build Script:** [build.bat](file:///e:/@Virtuart/Claude/Projetos/Virtuart4DNavisworks/build.bat) — Automates clean rebuilding.
+
+---
+
+## 4. Pending Verification
+
+- [ ] Export the test model and compare output with T7 (original) — verify ActorMesh count, transform values, spatial placement
+- [ ] Import into Unreal Engine / Twinmotion to validate visual correctness
+- [ ] Measure export time improvement

@@ -79,9 +79,12 @@ Conformance > taste inside codebase. Convention harmful → surface it. Don't fo
   - Scale coordinates by `100.0f` to convert from Navisworks meters to Unreal Engine centimeters.
   - Invert the Y-axis (`-y`) to transform from Navisworks Right-Handed Z-Up to Unreal Engine Left-Handed Z-Up coordinate space.
 
-### 4. Scene Graph & Metadata Mapping
-- Build the scene graph hierarchically: empty grouping nodes map to `FDatasmithFacadeActor` and items containing geometry map to `FDatasmithFacadeActorMesh`.
-- **STRICT DIRECTIVE:** You must maintain the exact tree hierarchy and world-coordinate baking logic. Parents must always be `FDatasmithFacadeActor`, leaf geometry nodes must be `FDatasmithFacadeActorMesh`, and local-to-world transforms must be baked directly into the vertices inside `DatasmithGeometryCallback.cs` (by passing the fragment matrix to the callback constructor), leaving the actor transform as identity. **NEVER** decompose matrices, restructure fragment actor nodes, or change this mapping, as it breaks spatial positioning and centers all meshes at the origin.
+### 4. Scene Graph & Metadata Mapping (Fragment-Level Architecture)
+- Build the scene graph hierarchically: **all** nodes in the .NET hierarchy (including leaf geometry items) map to `FDatasmithFacadeActor` as grouping parents.
+- **Fragment-Level Export:** For each leaf item with geometry, iterate its COM fragments. Each fragment becomes a child `FDatasmithFacadeActorMesh` with:
+  - Geometry extracted in **local/fragment space** (no matrix bake into vertices; apply only coordinate conversion: 100x scale for meters-to-cm, Y-axis inversion for LH Z-up).
+  - The fragment's `GetLocalToWorldMatrix()` **decomposed** into translation, quaternion rotation, and scale, set via `SetTranslation()`, `SetRotation()`, `SetScale()` on the ActorMesh.
+- This matches the architecture of the original Epic Games Datasmith Navisworks exporter (verified by comparing T7 vs T8 output files).
 - Map **all** properties and custom attributes by concatenating `CategoryName.PropertyName` into strings and creating `FDatasmithFacadeMetaData` objects.
 - Associate metadata dynamically with actors using `metaData.SetAssociatedElement(actor)` and add them to the scene using `scene.AddMetaData(metaData)`.
 
