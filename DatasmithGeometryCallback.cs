@@ -106,99 +106,9 @@ namespace Virtuart4DNavisworks
             }
         }
 
-        /// <summary>
-        /// Creates a callback that bakes the local-to-world matrix into vertex positions.
-        /// Pass null for local-space mode (no matrix multiplication, just coordinate conversion).
-        /// </summary>
         public DatasmithGeometryCallback(object localToWorldMatrix)
         {
-            _matrix = localToWorldMatrix != null ? ExtractMatrix(localToWorldMatrix) : null;
-        }
-
-        /// <summary>
-        /// Decomposes a Navisworks 4x4 local-to-world matrix into Unreal-ready translation, quaternion, and scale.
-        /// Applies coordinate conversion: meters to centimeters (100x), Y-axis inversion for LH Z-up.
-        /// </summary>
-        public static void DecomposeMatrix(object matrixObj,
-            out float tx, out float ty, out float tz,
-            out float qx, out float qy, out float qz, out float qw,
-            out float sx, out float sy, out float sz)
-        {
-            tx = ty = tz = 0f;
-            qx = qy = qz = 0f; qw = 1f;
-            sx = sy = sz = 1f;
-
-            float[] m = ExtractMatrix(matrixObj);
-
-            // Extract translation (row-major: m[12], m[13], m[14])
-            // Convert: meters to cm (100x), invert Y
-            tx = m[12] * 100.0f;
-            ty = -m[13] * 100.0f;
-            tz = m[14] * 100.0f;
-
-            // Extract scale from column vectors
-            // Column 0: m[0], m[1], m[2]
-            // Column 1: m[4], m[5], m[6]
-            // Column 2: m[8], m[9], m[10]
-            float sx0 = (float)Math.Sqrt(m[0] * m[0] + m[1] * m[1] + m[2] * m[2]);
-            float sy0 = (float)Math.Sqrt(m[4] * m[4] + m[5] * m[5] + m[6] * m[6]);
-            float sz0 = (float)Math.Sqrt(m[8] * m[8] + m[9] * m[9] + m[10] * m[10]);
-
-            sx = sx0 > 0.0001f ? sx0 : 1f;
-            sy = sy0 > 0.0001f ? sy0 : 1f;
-            sz = sz0 > 0.0001f ? sz0 : 1f;
-
-            // Normalize rotation matrix columns
-            float r00 = m[0] / sx, r01 = m[1] / sx, r02 = m[2] / sx;
-            float r10 = m[4] / sy, r11 = m[5] / sy, r12 = m[6] / sy;
-            float r20 = m[8] / sz, r21 = m[9] / sz, r22 = m[10] / sz;
-
-            // Apply Y-axis inversion to the rotation matrix
-            // Negate row 1 and column 1 of the rotation
-            r01 = -r01; r11 = -r11; r21 = -r21;
-            r10 = -r10; r12 = -r12;
-
-            // Convert 3x3 rotation matrix to quaternion (Shepperd method)
-            float trace = r00 + r11 + r22;
-            if (trace > 0)
-            {
-                float s = (float)Math.Sqrt(trace + 1.0f) * 2f;
-                qw = 0.25f * s;
-                qx = (r21 - r12) / s;
-                qy = (r02 - r20) / s;
-                qz = (r10 - r01) / s;
-            }
-            else if (r00 > r11 && r00 > r22)
-            {
-                float s = (float)Math.Sqrt(1.0f + r00 - r11 - r22) * 2f;
-                qw = (r21 - r12) / s;
-                qx = 0.25f * s;
-                qy = (r01 + r10) / s;
-                qz = (r02 + r20) / s;
-            }
-            else if (r11 > r22)
-            {
-                float s = (float)Math.Sqrt(1.0f + r11 - r00 - r22) * 2f;
-                qw = (r02 - r20) / s;
-                qx = (r01 + r10) / s;
-                qy = 0.25f * s;
-                qz = (r12 + r21) / s;
-            }
-            else
-            {
-                float s = (float)Math.Sqrt(1.0f + r22 - r00 - r11) * 2f;
-                qw = (r10 - r01) / s;
-                qx = (r02 + r20) / s;
-                qy = (r12 + r21) / s;
-                qz = 0.25f * s;
-            }
-
-            // Normalize quaternion
-            float qlen = (float)Math.Sqrt(qx * qx + qy * qy + qz * qz + qw * qw);
-            if (qlen > 0.0001f)
-            {
-                qx /= qlen; qy /= qlen; qz /= qlen; qw /= qlen;
-            }
+            _matrix = ExtractMatrix(localToWorldMatrix);
         }
 
         public static float[] ExtractMatrix(object matrixObj)
@@ -329,20 +239,10 @@ namespace Virtuart4DNavisworks
                 float ly = (float)localCoords[1];
                 float lz = (float)localCoords[2];
 
-                if (_matrix != null)
-                {
-                    // World-space mode: Apply Local-to-World transform matrix
-                    rx = lx * _matrix[0] + ly * _matrix[4] + lz * _matrix[8] + _matrix[12];
-                    ry = lx * _matrix[1] + ly * _matrix[5] + lz * _matrix[9] + _matrix[13];
-                    rz = lx * _matrix[2] + ly * _matrix[6] + lz * _matrix[10] + _matrix[14];
-                }
-                else
-                {
-                    // Local-space mode: return raw local coordinates (no matrix bake)
-                    rx = lx;
-                    ry = ly;
-                    rz = lz;
-                }
+                // Apply Local-to-World transform matrix
+                rx = lx * _matrix[0] + ly * _matrix[4] + lz * _matrix[8] + _matrix[12];
+                ry = lx * _matrix[1] + ly * _matrix[5] + lz * _matrix[9] + _matrix[13];
+                rz = lx * _matrix[2] + ly * _matrix[6] + lz * _matrix[10] + _matrix[14];
             }
 
             Array narr = v.normal as Array;
@@ -354,20 +254,10 @@ namespace Virtuart4DNavisworks
                 float lny = (float)localNorms[1];
                 float lnz = (float)localNorms[2];
 
-                if (_matrix != null)
-                {
-                    // World-space mode: Apply Local-to-World transform matrix (Rotation/Scale only)
-                    rnx = lnx * _matrix[0] + lny * _matrix[4] + lnz * _matrix[8];
-                    rny = lnx * _matrix[1] + lny * _matrix[5] + lnz * _matrix[9];
-                    rnz = lnx * _matrix[2] + lny * _matrix[6] + lnz * _matrix[10];
-                }
-                else
-                {
-                    // Local-space mode: return raw normals
-                    rnx = lnx;
-                    rny = lny;
-                    rnz = lnz;
-                }
+                // Apply Local-to-World transform matrix (Rotation/Scale only)
+                rnx = lnx * _matrix[0] + lny * _matrix[4] + lnz * _matrix[8];
+                rny = lnx * _matrix[1] + lny * _matrix[5] + lnz * _matrix[9];
+                rnz = lnx * _matrix[2] + lny * _matrix[6] + lnz * _matrix[10];
 
                 float len = (float)Math.Sqrt(rnx * rnx + rny * rny + rnz * rnz);
                 if (len > 0.0001f)
