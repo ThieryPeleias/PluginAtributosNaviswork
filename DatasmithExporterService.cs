@@ -112,63 +112,104 @@ namespace Virtuart4DNavisworks
                     {
                         processedPaths++;
                         ModelItem item = ComBridge.ToModelItem(path);
-                        if (item == null || !actorsMap.TryGetValue(item, out FDatasmithFacadeActor actor))
+                        if (item == null) continue;
+
+                        FDatasmithFacadeActor actor = null;
+                        ModelItem current = item;
+                        while (current != null)
+                        {
+                            if (actorsMap.TryGetValue(current, out actor))
+                            {
+                                break;
+                            }
+                            current = current.Parent;
+                        }
+
+                        if (actor == null)
                         {
                             continue;
                         }
 
                         if (actor is FDatasmithFacadeActorMesh actorMesh)
                         {
-                            // Process and accumulate all fragments for this path
-                            var allVertices = new List<float>();
-                            var allNormals = new List<float>();
-                            var allIndices = new List<int>();
-
-                            foreach (COMApi.InwOaFragment3 frag in path.Fragments())
+                            try
                             {
-                                var callback = new DatasmithGeometryCallback(frag.GetLocalToWorldMatrix());
-                                frag.GenerateSimplePrimitives(COMApi.nwEVertexProperty.eNORMAL, callback);
+                                // Process and accumulate all fragments for this path safely
+                                var allVertices = new List<float>();
+                                var allNormals = new List<float>();
+                                var allIndices = new List<int>();
 
-                                if (callback.Vertices.Count > 0)
+                                dynamic fragsColl = path.Fragments();
+                                int fragsCount = fragsColl.Count;
+
+                                for (int f = 1; f <= fragsCount; f++)
                                 {
-                                    int vertOffset = allVertices.Count / 3;
-                                    allVertices.AddRange(callback.Vertices);
-                                    allNormals.AddRange(callback.Normals);
-
-                                    foreach (int idx in callback.Indices)
+                                    try
                                     {
-                                        allIndices.Add(vertOffset + idx);
+                                        dynamic frag = fragsColl.Item(f);
+                                        if (frag == null) continue;
+
+                                        var callback = new DatasmithGeometryCallback(frag.GetLocalToWorldMatrix());
+                                        frag.GenerateSimplePrimitives(COMApi.nwEVertexProperty.eNORMAL, callback);
+
+                                        if (callback.Vertices.Count > 0)
+                                        {
+                                            int vertOffset = allVertices.Count / 3;
+                                            allVertices.AddRange(callback.Vertices);
+                                            allNormals.AddRange(callback.Normals);
+
+                                            foreach (int idx in callback.Indices)
+                                            {
+                                                allIndices.Add(vertOffset + idx);
+                                            }
+                                        }
+                                    }
+                                    catch (Exception fragEx)
+                                    {
+                                        Log($"[Fragment Error] Failed to process fragment {f} on path: {fragEx.Message}");
+                                    }
+                                }
+
+                                // Generate Datasmith mesh if geometry vertices are found
+                                if (allVertices.Count > 0)
+                                {
+                                    using (var mesh = new FDatasmithFacadeMesh())
+                                    {
+                                        mesh.SetName(actorMesh.GetName() + "_Mesh");
+                                        mesh.SetVerticesCount(allVertices.Count / 3);
+                                        for (int i = 0; i < allVertices.Count / 3; i++)
+                                        {
+                                            mesh.SetVertex(i, allVertices[i * 3], allVertices[i * 3 + 1], allVertices[i * 3 + 2]);
+                                            mesh.SetNormal(i, allNormals[i * 3], allNormals[i * 3 + 1], allNormals[i * 3 + 2]);
+                                        }
+
+                                        mesh.SetFacesCount(allIndices.Count / 3);
+                                        for (int i = 0; i < allIndices.Count / 3; i++)
+                                        {
+                                            mesh.SetFace(i, allIndices[i * 3], allIndices[i * 3 + 1], allIndices[i * 3 + 2]);
+                                        }
+
+                                        var meshElement = new FDatasmithFacadeMeshElement(actorMesh.GetName() + "_MeshElement");
+                                        meshElement.SetLabel(actorMesh.GetLabel() + "_Mesh");
+
+                                        bool meshSuccess = scene.ExportDatasmithMesh(meshElement, mesh);
+                                        if (meshSuccess)
+                                        {
+                                            scene.AddMesh(meshElement);
+                                            actorMesh.SetMesh(meshElement.GetName());
+                                            meshesExported++;
+                                        }
+                                        else
+                                        {
+                                            Log($"[Mesh Error] FDatasmithFacadeScene::ExportDatasmithMesh returned false for: {meshElement.GetName()}");
+                                            meshElement.Dispose();
+                                        }
                                     }
                                 }
                             }
-
-                            // Generate Datasmith mesh if geometry vertices are found
-                            if (allVertices.Count > 0)
+                            catch (Exception pathEx)
                             {
-                                using (var mesh = new FDatasmithFacadeMesh())
-                                {
-                                    mesh.SetName(actorMesh.GetName() + "_Mesh");
-                                    mesh.SetVerticesCount(allVertices.Count / 3);
-                                    for (int i = 0; i < allVertices.Count / 3; i++)
-                                    {
-                                        mesh.SetVertex(i, allVertices[i * 3], allVertices[i * 3 + 1], allVertices[i * 3 + 2]);
-                                        mesh.SetNormal(i, allNormals[i * 3], allNormals[i * 3 + 1], allNormals[i * 3 + 2]);
-                                    }
-
-                                    mesh.SetFacesCount(allIndices.Count / 3);
-                                    for (int i = 0; i < allIndices.Count / 3; i++)
-                                    {
-                                        mesh.SetFace(i, allIndices[i * 3], allIndices[i * 3 + 1], allIndices[i * 3 + 2]);
-                                    }
-
-                                    FDatasmithFacadeMeshElement meshElement = scene.ExportDatasmithMesh(mesh);
-                                    if (meshElement != null)
-                                    {
-                                        scene.AddMesh(meshElement);
-                                        actorMesh.SetMesh(meshElement.GetName());
-                                        meshesExported++;
-                                    }
-                                }
+                                Log($"[Path Error] Failed to process geometry on path: {pathEx.Message}");
                             }
                         }
 
