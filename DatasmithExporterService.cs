@@ -104,7 +104,22 @@ namespace Virtuart4DNavisworks
                     Log($"Step 1 Completed. Created {actorsCreated} actors in the hierarchy tree.");
 
                     Log("Step 2/3: Converting roots to COM selection and processing geometry fragments...");
-                    COMApi.InwOpSelection oSel = ComBridge.ToInwOpSelection(roots);
+                    
+                    var leafCollection = new ModelItemCollection();
+                    foreach (ModelItem root in roots)
+                    {
+                        foreach (ModelItem descendant in root.DescendantsAndSelf)
+                        {
+                            if (descendant.HasGeometry && !descendant.IsHidden && actorsMap.ContainsKey(descendant))
+                            {
+                                leafCollection.Add(descendant);
+                            }
+                        }
+                    }
+                    
+                    Log($"Resolved {leafCollection.Count} concrete visible geometry leaf nodes from {roots.Count} roots.");
+                    
+                    COMApi.InwOpSelection oSel = ComBridge.ToInwOpSelection(leafCollection);
                     int processedPaths = 0;
                     int meshesExported = 0;
 
