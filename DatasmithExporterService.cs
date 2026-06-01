@@ -8,12 +8,32 @@ using COMApi = Autodesk.Navisworks.Api.Interop.ComApi;
 namespace Virtuart4DNavisworks
 {
     /// <summary>
-    /// Service that coordinates the export of Navisworks scenes using the Datasmith C# Facade SDK.
+    /// Performance-optimized service that coordinates the export of Navisworks scenes using the Datasmith C# Facade SDK.
+    /// Employs a fast single-pass COM traversal and generates real-time logs to monitor export progress.
     /// </summary>
     public static class DatasmithExporterService
     {
+        private static string _logPath;
+
         /// <summary>
-        /// Exports the active Navisworks document to a Datasmith file.
+        /// Writes a timestamped message to both the debug console and the export log file.
+        /// </summary>
+        private static void Log(string message)
+        {
+            try
+            {
+                string logMsg = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {message}{Environment.NewLine}";
+                System.Diagnostics.Debug.Write(logMsg);
+                if (!string.IsNullOrEmpty(_logPath))
+                {
+                    File.AppendAllText(_logPath, logMsg);
+                }
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// Exports the active Navisworks document to a Datasmith file using a high-performance pipeline.
         /// </summary>
         /// <param name="doc">The active Navisworks Document.</param>
         /// <param name="filePath">Target .udatasmith file path.</param>
@@ -24,24 +44,31 @@ namespace Virtuart4DNavisworks
 
             string outputDir = Path.GetDirectoryName(filePath);
             string sceneName = Path.GetFileNameWithoutExtension(filePath);
+            _logPath = Path.Combine(outputDir, sceneName + "_export.log");
 
-            if (string.IsNullOrEmpty(outputDir) || !Directory.Exists(outputDir))
+            // Initialize or clear log file
+            try
             {
-                throw new DirectoryNotFoundException($"The target directory does not exist: {outputDir}");
+                if (File.Exists(_logPath)) File.Delete(_logPath);
             }
+            catch { }
 
-            // Determine what to export: active selection if not empty, otherwise the entire model
+            Log("=================================================================");
+            Log($"Starting Virtuart4D Datasmith Export for: {doc.Title}");
+            Log($"Target File: {filePath}");
+            Log("=================================================================");
+
             var selection = doc.CurrentSelection.SelectedItems;
             var roots = new ModelItemCollection();
 
             if (selection != null && selection.Count > 0)
             {
-                // Export selection roots only
+                Log($"Exporting active selection ({selection.Count} root elements selected).");
                 roots.AddRange(selection);
             }
             else
             {
-                // Export entire visible models
+                Log("Exporting entire visible models.");
                 foreach (Model model in doc.Models)
                 {
                     if (model.RootItem != null)
@@ -53,40 +80,135 @@ namespace Virtuart4DNavisworks
 
             if (roots.Count == 0)
             {
+                Log("Error: No elements found to export.");
                 return false;
             }
 
-            // Initialize the Datasmith Scene Facade
-            using (var scene = new FDatasmithFacadeScene("Navisworks", "Autodesk", "Navisworks Manage", "2025"))
+            try
             {
-                scene.SetName(sceneName);
-                scene.SetOutputPath(outputDir);
-                scene.PreExport();
-
-                // Recursively export all root items
-                foreach (ModelItem rootItem in roots)
+                Log("Initializing Datasmith Scene Facade...");
+                using (var scene = new FDatasmithFacadeScene("Navisworks", "Autodesk", "Navisworks Manage", "2025"))
                 {
-                    ExportItemRecursive(rootItem, null, scene);
+                    scene.SetName(sceneName);
+                    scene.SetOutputPath(outputDir);
+                    scene.PreExport();
+
+                    Log("Step 1/3: Traversing lightweight .NET hierarchy to build actors dictionary...");
+                    var actorsMap = new Dictionary<ModelItem, FDatasmithFacadeActor>();
+                    int actorsCreated = 0;
+
+                    foreach (ModelItem rootItem in roots)
+                    {
+                        BuildActorsHierarchyRecursive(rootItem, null, scene, actorsMap, ref actorsCreated);
+                    }
+                    Log($"Step 1 Completed. Created {actorsCreated} actors in the hierarchy tree.");
+
+                    Log("Step 2/3: Converting roots to COM selection and processing geometry fragments...");
+                    COMApi.InwOpSelection oSel = ComBridge.ToInwOpSelection(roots);
+                    int processedPaths = 0;
+                    int meshesExported = 0;
+
+                    foreach (COMApi.InwOaPath3 path in oSel.Paths())
+                    {
+                        processedPaths++;
+                        ModelItem item = ComBridge.ToModelItem(path);
+                        if (item == null || !actorsMap.TryGetValue(item, out FDatasmithFacadeActor actor))
+                        {
+                            continue;
+                        }
+
+                        if (actor is FDatasmithFacadeActorMesh actorMesh)
+                        {
+                            // Process and accumulate all fragments for this path
+                            var allVertices = new List<float>();
+                            var allNormals = new List<float>();
+                            var allIndices = new List<int>();
+
+                            foreach (COMApi.InwOaFragment3 frag in path.Fragments())
+                            {
+                                var callback = new DatasmithGeometryCallback(frag.GetLocalToWorldMatrix());
+                                frag.GenerateSimplePrimitives(COMApi.nwEVertexProperty.eNORMAL, callback);
+
+                                if (callback.Vertices.Count > 0)
+                                {
+                                    int vertOffset = allVertices.Count / 3;
+                                    allVertices.AddRange(callback.Vertices);
+                                    allNormals.AddRange(callback.Normals);
+
+                                    foreach (int idx in callback.Indices)
+                                    {
+                                        allIndices.Add(vertOffset + idx);
+                                    }
+                                }
+                            }
+
+                            // Generate Datasmith mesh if geometry vertices are found
+                            if (allVertices.Count > 0)
+                            {
+                                using (var mesh = new FDatasmithFacadeMesh())
+                                {
+                                    mesh.SetName(actorMesh.GetName() + "_Mesh");
+                                    mesh.SetVerticesCount(allVertices.Count / 3);
+                                    for (int i = 0; i < allVertices.Count / 3; i++)
+                                    {
+                                        mesh.SetVertex(i, allVertices[i * 3], allVertices[i * 3 + 1], allVertices[i * 3 + 2]);
+                                        mesh.SetNormal(i, allNormals[i * 3], allNormals[i * 3 + 1], allNormals[i * 3 + 2]);
+                                    }
+
+                                    mesh.SetFacesCount(allIndices.Count / 3);
+                                    for (int i = 0; i < allIndices.Count / 3; i++)
+                                    {
+                                        mesh.SetFace(i, allIndices[i * 3], allIndices[i * 3 + 1], allIndices[i * 3 + 2]);
+                                    }
+
+                                    FDatasmithFacadeMeshElement meshElement = scene.ExportDatasmithMesh(mesh);
+                                    if (meshElement != null)
+                                    {
+                                        scene.AddMesh(meshElement);
+                                        actorMesh.SetMesh(meshElement.GetName());
+                                        meshesExported++;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (processedPaths % 500 == 0)
+                        {
+                            Log($"Progress: Processed {processedPaths} nodes. Exported {meshesExported} meshes...");
+                        }
+                    }
+                    Log($"Step 2 Completed. Total processed paths: {processedPaths}. Exported meshes: {meshesExported}.");
+
+                    Log("Step 3/3: Saving Datasmith scene and finalizing export...");
+                    bool success = scene.ExportScene(filePath);
+                    scene.CleanUp();
+
+                    Log($"Export completed successfully! Success status: {success}");
+                    Log($"Log saved to: {_logPath}");
+                    Log("=================================================================");
+                    return success;
                 }
-
-                // Execute the final export
-                bool success = scene.ExportScene(filePath);
-                
-                scene.CleanUp();
-
-                return success;
+            }
+            catch (Exception ex)
+            {
+                Log($"[CRITICAL ERROR] Export failed: {ex.Message}");
+                Log($"Stack Trace: {ex.StackTrace}");
+                throw;
             }
         }
 
         /// <summary>
-        /// Recursively exports a ModelItem and its children to the Datasmith Scene.
+        /// Recursively traverses the lightweight .NET model items to construct the actor hierarchy tree.
         /// </summary>
-        private static void ExportItemRecursive(ModelItem item, FDatasmithFacadeActor parentActor, FDatasmithFacadeScene scene)
+        private static void BuildActorsHierarchyRecursive(
+            ModelItem item, 
+            FDatasmithFacadeActor parentActor, 
+            FDatasmithFacadeScene scene,
+            Dictionary<ModelItem, FDatasmithFacadeActor> actorsMap,
+            ref int actorsCreated)
         {
-            // Skip hidden items to respect visibility rules in Navisworks
             if (item.IsHidden) return;
 
-            // Generate a unique actor name using InstanceGuid or GetHashCode
             string guidStr = item.InstanceGuid != Guid.Empty ? item.InstanceGuid.ToString() : item.GetHashCode().ToString();
             string cleanName = "Node_" + guidStr.Replace("{", "").Replace("}", "").Replace("-", "_");
 
@@ -94,103 +216,37 @@ namespace Virtuart4DNavisworks
 
             if (item.HasGeometry)
             {
-                var actorMesh = new FDatasmithFacadeActorMesh(cleanName);
-                actorMesh.SetLabel(item.DisplayName ?? item.ClassDisplayName ?? "Element");
-
-                // Prepare mesh accumulator
-                using (var mesh = new FDatasmithFacadeMesh())
-                {
-                    mesh.SetName(cleanName + "_Mesh");
-
-                    var allVertices = new List<float>();
-                    var allNormals = new List<float>();
-                    var allIndices = new List<int>();
-
-                    // Leverage COM API to extract low-level geometry fragments
-                    var itemCollection = new ModelItemCollection { item };
-                    COMApi.InwOpSelection oSel = ComBridge.ToInwOpSelection(itemCollection);
-
-                    foreach (COMApi.InwOaPath3 path in oSel.Paths())
-                    {
-                        foreach (COMApi.InwOaFragment3 frag in path.Fragments())
-                        {
-                            var callback = new DatasmithGeometryCallback(frag.GetLocalToWorldMatrix());
-                            frag.GenerateSimplePrimitives(COMApi.nwEVertexProperty.eNORMAL, callback);
-
-                            if (callback.Vertices.Count > 0)
-                            {
-                                int vertOffset = allVertices.Count / 3;
-                                allVertices.AddRange(callback.Vertices);
-                                allNormals.AddRange(callback.Normals);
-
-                                foreach (int idx in callback.Indices)
-                                {
-                                    allIndices.Add(vertOffset + idx);
-                                }
-                            }
-                        }
-                    }
-
-                    // Populate Datasmith Mesh with geometry if any was found
-                    if (allVertices.Count > 0)
-                    {
-                        mesh.SetVerticesCount(allVertices.Count / 3);
-                        for (int i = 0; i < allVertices.Count / 3; i++)
-                        {
-                            mesh.SetVertex(i, allVertices[i * 3], allVertices[i * 3 + 1], allVertices[i * 3 + 2]);
-                            mesh.SetNormal(i, allNormals[i * 3], allNormals[i * 3 + 1], allNormals[i * 3 + 2]);
-                        }
-
-                        mesh.SetFacesCount(allIndices.Count / 3);
-                        for (int i = 0; i < allIndices.Count / 3; i++)
-                        {
-                            mesh.SetFace(i, allIndices[i * 3], allIndices[i * 3 + 1], allIndices[i * 3 + 2]);
-                        }
-
-                        // Export geometry to a .dasmesh file
-                        FDatasmithFacadeMeshElement meshElement = scene.ExportDatasmithMesh(mesh);
-                        if (meshElement != null)
-                        {
-                            scene.AddMesh(meshElement);
-                            actorMesh.SetMesh(meshElement.GetName());
-                        }
-                    }
-                }
-
-                currentActor = actorMesh;
+                currentActor = new FDatasmithFacadeActorMesh(cleanName);
             }
             else
             {
-                // Create standard actor for grouping nodes in the tree
                 currentActor = new FDatasmithFacadeActor(cleanName);
-                currentActor.SetLabel(item.DisplayName ?? item.ClassDisplayName ?? "Group");
             }
 
-            if (currentActor != null)
+            currentActor.SetLabel(item.DisplayName ?? item.ClassDisplayName ?? "Element");
+            actorsMap[item] = currentActor;
+            actorsCreated++;
+
+            // Extract metadata properties and associate with this actor
+            ExportProperties(item, currentActor, scene);
+
+            if (parentActor != null)
             {
-                // Extract properties/attributes and map to Datasmith Metadata
-                ExportProperties(item, currentActor, scene);
+                parentActor.AddChild(currentActor);
+            }
+            else
+            {
+                scene.AddActor(currentActor);
+            }
 
-                // Add to hierarchy
-                if (parentActor != null)
-                {
-                    parentActor.AddChild(currentActor);
-                }
-                else
-                {
-                    scene.AddActor(currentActor);
-                }
-
-                // Recursively export all children nodes
-                foreach (ModelItem child in item.Children)
-                {
-                    ExportItemRecursive(child, currentActor, scene);
-                }
+            foreach (ModelItem child in item.Children)
+            {
+                BuildActorsHierarchyRecursive(child, currentActor, scene, actorsMap, ref actorsCreated);
             }
         }
 
         /// <summary>
-        /// Maps all native and custom properties of a ModelItem to Datasmith Metadata.
+        /// Extracts standard and custom property categories and maps them into Datasmith Metadata.
         /// </summary>
         private static void ExportProperties(ModelItem item, FDatasmithFacadeActor actor, FDatasmithFacadeScene scene)
         {
