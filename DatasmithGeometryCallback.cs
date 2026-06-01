@@ -233,10 +233,11 @@ namespace Virtuart4DNavisworks
             Array arr = v.coord as Array;
             if (arr != null)
             {
-                int lbc = arr.GetLowerBound(0);
-                float lx = Convert.ToSingle(arr.GetValue(lbc));
-                float ly = Convert.ToSingle(arr.GetValue(lbc + 1));
-                float lz = Convert.ToSingle(arr.GetValue(lbc + 2));
+                double[] localCoords = new double[3];
+                arr.CopyTo(localCoords, 0);
+                float lx = (float)localCoords[0];
+                float ly = (float)localCoords[1];
+                float lz = (float)localCoords[2];
 
                 // Apply Local-to-World transform matrix
                 rx = lx * _matrix[0] + ly * _matrix[4] + lz * _matrix[8] + _matrix[12];
@@ -247,10 +248,11 @@ namespace Virtuart4DNavisworks
             Array narr = v.normal as Array;
             if (narr != null)
             {
-                int lbn = narr.GetLowerBound(0);
-                float lnx = Convert.ToSingle(narr.GetValue(lbn));
-                float lny = Convert.ToSingle(narr.GetValue(lbn + 1));
-                float lnz = Convert.ToSingle(narr.GetValue(lbn + 2));
+                double[] localNorms = new double[3];
+                narr.CopyTo(localNorms, 0);
+                float lnx = (float)localNorms[0];
+                float lny = (float)localNorms[1];
+                float lnz = (float)localNorms[2];
 
                 // Apply Local-to-World transform matrix (Rotation/Scale only)
                 rnx = lnx * _matrix[0] + lny * _matrix[4] + lnz * _matrix[8];
