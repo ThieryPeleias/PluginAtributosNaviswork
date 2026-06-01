@@ -40,6 +40,7 @@ namespace Virtuart4DNavisworks
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
             MinimizeBox = false;
+            ShowInTaskbar = false;
             BackColor = UITheme.Color.Background;
             Font = UITheme.Typography.Body;
 
@@ -202,6 +203,17 @@ namespace Virtuart4DNavisworks
             
             // Check active selection and show immediate status
             UpdateSelectionInfo();
+
+            // Subscribe to real-time selection changes in the Navisworks scene
+            try
+            {
+                var doc = Autodesk.Navisworks.Api.Application.ActiveDocument;
+                if (doc != null && doc.CurrentSelection != null)
+                {
+                    doc.CurrentSelection.Changed += CurrentSelection_Changed;
+                }
+            }
+            catch { }
         }
 
         private void UpdateSelectionInfo()
@@ -381,6 +393,30 @@ namespace Virtuart4DNavisworks
                     }
                 }
             }
+        }
+
+        private void CurrentSelection_Changed(object sender, EventArgs e)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new System.EventHandler(CurrentSelection_Changed), sender, e);
+                return;
+            }
+            UpdateSelectionInfo();
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            try
+            {
+                var doc = Autodesk.Navisworks.Api.Application.ActiveDocument;
+                if (doc != null && doc.CurrentSelection != null)
+                {
+                    doc.CurrentSelection.Changed -= CurrentSelection_Changed;
+                }
+            }
+            catch { }
+            base.OnFormClosing(e);
         }
     }
 }

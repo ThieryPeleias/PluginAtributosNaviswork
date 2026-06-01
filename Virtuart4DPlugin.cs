@@ -154,6 +154,8 @@ namespace Virtuart4DNavisworks
     {
         public event EventHandler CanExecuteChanged { add { } remove { } }
 
+        private static ExportSettingsForm _settingsForm;
+
         public bool CanExecute(object parameter)
         {
             return true;
@@ -180,9 +182,21 @@ namespace Virtuart4DNavisworks
                 return;
             }
 
-            using (var settingsForm = new ExportSettingsForm())
+            if (_settingsForm == null || _settingsForm.IsDisposed)
             {
-                settingsForm.ShowDialog();
+                _settingsForm = new ExportSettingsForm();
+                
+                // Get Navisworks main window handle as owner so it floats on top without blocking
+                IWin32Window owner = Autodesk.Navisworks.Api.Application.Gui.MainWindow;
+                _settingsForm.Show(owner);
+            }
+            else
+            {
+                _settingsForm.BringToFront();
+                if (_settingsForm.WindowState == FormWindowState.Minimized)
+                {
+                    _settingsForm.WindowState = FormWindowState.Normal;
+                }
             }
         }
     }
