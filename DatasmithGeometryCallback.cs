@@ -111,7 +111,7 @@ namespace Virtuart4DNavisworks
             _matrix = ExtractMatrix(localToWorldMatrix);
         }
 
-        private static float[] ExtractMatrix(object matrixObj)
+        public static float[] ExtractMatrix(object matrixObj)
         {
             var result = new float[16];
             if (matrixObj == null)
