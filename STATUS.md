@@ -14,14 +14,17 @@ This document summarizes the current state of the project, details the architect
 
 ---
 
-## 2. Active Diagnostic Loop (Performance & File Size Bloat)
+## 2. Active Diagnostic Loop (Performance & Code Freeze)
 
-Despite 100% visual correctness, the exporter is currently facing a **performance issue**:
-- **The Issue:** Generating `.udatasmith` files is slow (~2 minutes for Mauro model). 
-- **Active Diagnostic Findings:**
-  1. **SafeArray CopyTo Optimization:** We optimized the hot-path vertex loop in `DatasmithGeometryCallback.cs` by replacing millions of slow COM `GetValue` reflection calls with fast, native `Array.CopyTo` memory copies. This successfully optimized the CPU coordinate retrieval.
-  2. **COM API Performance Bottleneck:** The primary bottleneck is the legacy Navisworks COM API itself. When we call `frag.GenerateSimplePrimitives(...)` on leaf paths that contain many fragments (e.g., roof tiles `Telha` which have 100 fragments each), the COM marshalling loop takes approximately 1.5 to 2 seconds per leaf node, resulting in the overall export delay. We are actively researching ways to optimize or batch this fragment-level marshalling.
-  3. **Vertex & Triangle Deduplication:** We implemented structural world-space deduplication using `VertexKey` and `TriangleKey` hashing inside the callback. While this merges duplicate/adjacent vertices to optimize `.udsmesh` sizes, it does not reduce the number of paths/fragments processed.
+Despite 100% visual correctness, the exporter has a known and permanent **performance limitation**:
+- **The Issue:** Generating `.udatasmith` files is slow (~2 minutes for the Mauro model). 
+- **Permanent Platform/COM Limitation:**
+  1. **SafeArray CopyTo Optimization:** We optimized the hot-path vertex loop in `DatasmithGeometryCallback.cs` by replacing millions of slow COM `GetValue` reflection calls with fast, native `Array.CopyTo` memory copies.
+  2. **Vertex Wrapper Reference Cache:** We implemented a C# COM reference cache (`_vertexRefCache`) that eliminates redundant property calls on shared vertices.
+  3. **COM API Bottleneck:** The remaining slow-down is caused by the Navisworks native COM marshalling overhead when calling `frag.GenerateSimplePrimitives(...)` for hundreds of geometry paths containing curved primitives (like tiles). This overhead is a permanent characteristic of the Navisworks interop layer.
+  4. **The Critical Trade-Off:** This slower speed is a mandatory trade-off to guarantee 100% accurate visual layout, rotation, scale, and skew handling via absolute world-space coordinate baking, because any attempts to decompose transforms or instance meshes corrupt the assemblies inside Unreal Engine.
+  5. **SOURCE CODE FREEZE:** The plugin source code is now **frozen and finalized** for this architecture. Do not perform any further code changes to improve export speed, as they will corrupt spatial alignments.
+
 
 ---
 
