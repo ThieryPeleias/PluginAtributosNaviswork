@@ -180,41 +180,9 @@ namespace Virtuart4DNavisworks
                 return;
             }
 
-            using (var sfd = new SaveFileDialog())
+            using (var settingsForm = new ExportSettingsForm())
             {
-                sfd.Title = "Export to Unreal Engine Datasmith";
-                sfd.Filter = "Unreal Datasmith (*.udatasmith)|*.udatasmith";
-                sfd.DefaultExt = "udatasmith";
-
-                if (sfd.ShowDialog() == DialogResult.OK)
-                {
-                    try
-                    {
-                        Cursor.Current = Cursors.WaitCursor;
-                        
-                        // Run export
-                        bool success = DatasmithExporterService.ExportActiveDocument(doc, sfd.FileName);
-
-                        Cursor.Current = Cursors.Default;
-
-                        if (success)
-                        {
-                            MessageBox.Show("Datasmith export completed successfully!",
-                                "Virtuart4D Exporter", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        }
-                        else
-                        {
-                            MessageBox.Show("Datasmith export failed. Please check log details.",
-                                "Virtuart4D Exporter", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Cursor.Current = Cursors.Default;
-                        MessageBox.Show($"An error occurred during export:\n{ex.Message}",
-                            "Virtuart4D Exporter", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                }
+                settingsForm.ShowDialog();
             }
         }
     }

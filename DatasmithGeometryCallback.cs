@@ -12,6 +12,9 @@ namespace Virtuart4DNavisworks
     public class DatasmithGeometryCallback : COMApi.InwSimplePrimitivesCB
     {
         private readonly float[] _matrix;
+        private readonly double _ox;
+        private readonly double _oy;
+        private readonly double _oz;
         
         // Lists to store extracted data
         public List<float> Vertices { get; } = new List<float>();
@@ -108,15 +111,18 @@ namespace Virtuart4DNavisworks
             }
         }
 
-        public DatasmithGeometryCallback(object localToWorldMatrix)
+        public DatasmithGeometryCallback(COMApi.InwLTransform3f localToWorldMatrix, double ox = 0, double oy = 0, double oz = 0)
         {
             _matrix = ExtractMatrix(localToWorldMatrix);
+            _ox = ox;
+            _oy = oy;
+            _oz = oz;
         }
 
-        public static float[] ExtractMatrix(object matrixObj)
+        public static float[] ExtractMatrix(COMApi.InwLTransform3f transform)
         {
             var result = new float[16];
-            if (matrixObj == null)
+            if (transform == null)
             {
                 // Identity matrix
                 result[0] = 1.0f; result[5] = 1.0f; result[10] = 1.0f; result[15] = 1.0f;
@@ -125,14 +131,7 @@ namespace Virtuart4DNavisworks
 
             try
             {
-                // Use standard reflection instead of dynamic binder to avoid Double[*] -> Double[] cast error
-                object matrixProp = matrixObj.GetType().InvokeMember(
-                    "Matrix",
-                    System.Reflection.BindingFlags.GetProperty,
-                    null,
-                    matrixObj,
-                    null
-                );
+                object matrixProp = transform.Matrix;
 
                 if (matrixProp is Array matrixData)
                 {
@@ -203,9 +202,9 @@ namespace Virtuart4DNavisworks
 
             ProcessVertex(v, out float x, out float y, out float z, out float nx, out float ny, out float nz);
 
-            float px = x * 100.0f;
-            float py = -y * 100.0f;
-            float pz = z * 100.0f;
+            float px = (x - (float)_ox) * 100.0f;
+            float py = -(y - (float)_oy) * 100.0f;
+            float pz = (z - (float)_oz) * 100.0f;
 
             index = GetOrCreateVertex(px, py, pz, nx, -ny, nz);
             _vertexRefCache[v] = index;
