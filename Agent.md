@@ -58,3 +58,33 @@ Conformance > taste inside codebase. Convention harmful → surface it. Don't fo
 - Don't guess APIs, versions, flags, commit SHAs, or package names. Verify.
 - User instructions always override.
 - **All UI text, button labels, tooltips, log messages, and comments must be in English.**
+
+## Project Peculiarities & Technical Constraints
+
+### 1. Target Environment & Compilation
+- **Platform:** Autodesk Navisworks Manage 2025.
+- **Framework:** Must target **.NET Framework 4.8** (`net48`).
+- **Targeting Pack:** Use NuGet `Microsoft.NETFramework.ReferenceAssemblies` in `.csproj` to allow cross-platform compiling using the dotnet CLI (e.g. `dotnet build`).
+- **Warning-Free Compilation:** Do **NOT** add managed assembly references to native C++ DLLs like `DatasmithFacadeCSharp.dll` in `.csproj`. Reference only the managed wrapper `DatasmithNavisworksPlugin2025.dll` to keep compilation completely warning-free (eliminating `MSB3246`).
+
+### 2. External SDK Reference Paths
+- **Navisworks Manage 2025 APIs:** `C:\Program Files\Autodesk\Navisworks Manage 2025\`
+- **Epic Games Datasmith C# Facade SDK:** `C:\ProgramData\Autodesk\ApplicationPlugins\EpicGamesDatasmithExporter.bundle\`
+
+### 3. Geometry Extraction Logic (COM API)
+- The Navisworks native .NET API does not expose low-level geometry; use the **COM API** instead (`Autodesk.Navisworks.Api.ComApi.ComApiBridge` to cast selections to `InwOpSelection`).
+- Iterate over fragments (`InwOaFragment3`) and call `GenerateSimplePrimitives` by implementing the `InwSimplePrimitivesCB` callback interface.
+- Retrieve the fragment's matrix (`GetLocalToWorldMatrix()`) and extract its 16 float elements in row-major format using late-bound dynamic COM binding (`dynamic.Matrix`).
+- **Coordinate System Conversion:** 
+  - Scale coordinates by `100.0f` to convert from Navisworks meters to Unreal Engine centimeters.
+  - Invert the Y-axis (`-y`) to transform from Navisworks Right-Handed Z-Up to Unreal Engine Left-Handed Z-Up coordinate space.
+
+### 4. Scene Graph & Metadata Mapping
+- Build the scene graph hierarchically: empty grouping nodes map to `FDatasmithFacadeActor` and items containing geometry map to `FDatasmithFacadeActorMesh`.
+- Map **all** properties and custom attributes by concatenating `CategoryName.PropertyName` into strings and creating `FDatasmithFacadeMetaData` objects.
+- Associate metadata dynamically with actors using `metaData.SetAssociatedElement(actor)` and add them to the scene using `scene.AddMetaData(metaData)`.
+
+### 5. Autodesk Bundle Layout & Local Deployment
+- Local active builds are output to the Autodesk local plugins bundle folder: `%APPDATA%\Autodesk\ApplicationPlugins\Virtuart4DNavisworks.bundle\`.
+- Keep `PackageContents.xml` in the bundle's root mapping compatibilities to Navisworks 2025 series `Nw22` and pointing to `Contents/v22/Virtuart4DNavisworks.dll`.
+
