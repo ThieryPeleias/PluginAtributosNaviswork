@@ -81,6 +81,7 @@ Conformance > taste inside codebase. Convention harmful → surface it. Don't fo
 
 ### 4. Scene Graph & Metadata Mapping
 - Build the scene graph hierarchically: empty grouping nodes map to `FDatasmithFacadeActor` and items containing geometry map to `FDatasmithFacadeActorMesh`.
+- **STRICT DIRECTIVE:** You must maintain the exact tree hierarchy and world-coordinate baking logic. Parents must always be `FDatasmithFacadeActor`, leaf geometry nodes must be `FDatasmithFacadeActorMesh`, and local-to-world transforms must be baked directly into the vertices inside `DatasmithGeometryCallback.cs` (by passing the fragment matrix to the callback constructor), leaving the actor transform as identity. **NEVER** decompose matrices, restructure fragment actor nodes, or change this mapping, as it breaks spatial positioning and centers all meshes at the origin.
 - Map **all** properties and custom attributes by concatenating `CategoryName.PropertyName` into strings and creating `FDatasmithFacadeMetaData` objects.
 - Associate metadata dynamically with actors using `metaData.SetAssociatedElement(actor)` and add them to the scene using `scene.AddMetaData(metaData)`.
 
