@@ -8,7 +8,7 @@ This document summarizes the current state of the project, details the architect
 
 - **Compilation:** **100% Successful** (0 errors, 0 warnings) targeting **.NET Framework 4.8** using the dotnet CLI.
 - **UI Integration:** Fully operational. Adds the custom **Virtuart4D** ribbon tab and an **Export Datasmith** button.
-- **Git Alignment:** Fully configured identical dual remotes (successfully pushed all commits):
+- **Git Alignment:** Fully configured identical dual remotes (successfully force-pushed to synchronize stable reverted state):
   - **Gitea:** `http://192.168.255.109:3003/Virtuart4D/Virtuart4DNavisworks.git`
   - **GitHub:** `https://github.com/ThieryPeleias/Virtuart4DNavisworks.git`
 
@@ -16,16 +16,26 @@ This document summarizes the current state of the project, details the architect
 
 ## 2. Active Diagnostic Loop (Performance & File Size Bloat)
 
-Despite successful compilation and deployment, the custom exporter is currently stuck in a **performance loop**:
-- **The Issue:** `T8.udatasmith` yielded the same slow export speed (~2m 40s) and bloated file size (~12.9 MB udatasmith file) as `T5`.
+Despite 100% visual correctness, the exporter is currently facing a **performance issue**:
+- **The Issue:** Generating `.udatasmith` files is slow (~2 minutes for Mauro model). 
 - **Active Diagnostic Findings:**
-  1. **SafeArray CopyTo Optimization:** We successfully optimized the hot-path vertex loop in `DatasmithGeometryCallback.cs` by replacing millions of slow COM `GetValue` reflection calls with fast, native `Array.CopyTo` memory copies. This successfully optimized the CPU coordinate retrieval.
-  2. **COM API Performance Bottleneck:** The primary bottleneck is the legacy Navisworks COM API itself. When we call `frag.GenerateSimplePrimitives(...)` on leaf paths that contain many fragments (e.g., roof tiles `Telha` which have 100 fragments each), the COM marshalling loop takes approximately 1.5 to 2 seconds per leaf node, resulting in the overall export delay.
+  1. **SafeArray CopyTo Optimization:** We optimized the hot-path vertex loop in `DatasmithGeometryCallback.cs` by replacing millions of slow COM `GetValue` reflection calls with fast, native `Array.CopyTo` memory copies. This successfully optimized the CPU coordinate retrieval.
+  2. **COM API Performance Bottleneck:** The primary bottleneck is the legacy Navisworks COM API itself. When we call `frag.GenerateSimplePrimitives(...)` on leaf paths that contain many fragments (e.g., roof tiles `Telha` which have 100 fragments each), the COM marshalling loop takes approximately 1.5 to 2 seconds per leaf node, resulting in the overall export delay. We are actively researching ways to optimize or batch this fragment-level marshalling.
   3. **Vertex & Triangle Deduplication:** We implemented structural world-space deduplication using `VertexKey` and `TriangleKey` hashing inside the callback. While this merges duplicate/adjacent vertices to optimize `.udsmesh` sizes, it does not reduce the number of paths/fragments processed.
 
 ---
 
-## 3. Strict Architectural Directive (Structure & Placement)
+## 3. Deployed Binary Desynchronization Issue (CRITICAL - SOLVED)
+
+> [!IMPORTANT]
+> **THE "FALSE BUG" CACHING ISSUE:**
+> - **What Happened:** The codebase had successfully reverted to the stable `T1` branch (commit `35dd868`), but the newly compiled stable DLL was **never deployed** to the AppData folder (`%APPDATA%\Autodesk\ApplicationPlugins`) after the reset.
+> - **The Symptom:** Navisworks continued running the cached experimental instancing DLL built at `17:55`, leading to corrupted and distorted roof tiles (`Mullion Telha Colonial`) in subsequent exports (such as `T5`), even though the active code in the IDE was correct.
+> - **Prevention Rule:** After every git checkout, commit, reset, or manual edit, **always run the clean compilation and deploy script** (`deploy.ps1` or commands) and **restart Navisworks** to release loaded DLL file locks. Never assume the plugin folder is in sync with your IDE state.
+
+---
+
+## 4. Strict Architectural Directive (Structure & Placement)
 
 > [!WARNING]
 > **CRITICAL RULE:** Under no circumstances should we restructure the scene graph hierarchy or modify coordinate transformations to solve the performance loop.
@@ -35,7 +45,7 @@ Despite successful compilation and deployment, the custom exporter is currently 
 
 ---
 
-## 4. Active Code Base Reference Links
+## 5. Active Code Base Reference Links
 
 - **Core Exporter Service:** [DatasmithExporterService.cs](file:///e:/@Virtuart/Claude/Projetos/Virtuart4DNavisworks/DatasmithExporterService.cs) — Hierarchy traversal, Selection Expansion, and Datasmith Facade SDK integration.
 - **Geometry Callback Handler:** [DatasmithGeometryCallback.cs](file:///e:/@Virtuart/Claude/Projetos/Virtuart4DNavisworks/DatasmithGeometryCallback.cs) — Coordinates extraction, scaling, Y-axis inversion, and SafeArray `CopyTo` optimizations.

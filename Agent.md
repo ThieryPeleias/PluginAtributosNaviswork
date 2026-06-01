@@ -88,4 +88,6 @@ Conformance > taste inside codebase. Convention harmful → surface it. Don't fo
 ### 5. Autodesk Bundle Layout & Local Deployment
 - Local active builds are output to the Autodesk local plugins bundle folder: `%APPDATA%\Autodesk\ApplicationPlugins\Virtuart4DNavisworks.bundle\`.
 - Keep `PackageContents.xml` in the bundle's root mapping compatibilities to Navisworks 2025 series `Nw22` and pointing to `Contents/v22/Virtuart4DNavisworks.dll`.
+- **CRITICAL DEPLOYMENT WARNING (AVOID DESYNC LOOP):** After performing git resets, reverting commits, or editing code, **always** execute a clean compilation and redeploy the built bundle to `%APPDATA%\Autodesk\ApplicationPlugins\`. Navisworks **must** be restarted to release any existing DLL file locks and load the new binary. Failing to redeploy and restart leaves Navisworks running cached experimental or broken binaries, creating an endless desync loop where the source code appears correct but the active plugin execution is broken.
+
 

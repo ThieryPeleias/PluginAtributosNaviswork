@@ -20,6 +20,8 @@ namespace Virtuart4DNavisworks
 
         private readonly Dictionary<VertexKey, int> _vertexToIndex = new Dictionary<VertexKey, int>();
         private readonly HashSet<TriangleKey> _uniqueTriangles = new HashSet<TriangleKey>();
+        private readonly Dictionary<object, int> _vertexRefCache = new Dictionary<object, int>();
+
 
         public struct VertexKey : IEquatable<VertexKey>
         {
@@ -174,25 +176,9 @@ namespace Virtuart4DNavisworks
         {
             try
             {
-                // Process Vertex 1
-                ProcessVertex(v1, out float x1, out float y1, out float z1, out float nx1, out float ny1, out float nz1);
-                // Process Vertex 2
-                ProcessVertex(v2, out float x2, out float y2, out float z2, out float nx2, out float ny2, out float nz2);
-                // Process Vertex 3
-                ProcessVertex(v3, out float x3, out float y3, out float z3, out float nx3, out float ny3, out float nz3);
-
-                // Scale coordinates by 100.0f (meters to centimeters) and invert Y to match Unreal's coordinate convention
-                float px1 = x1 * 100.0f; float py1 = -y1 * 100.0f; float pz1 = z1 * 100.0f;
-                float px2 = x2 * 100.0f; float py2 = -y2 * 100.0f; float pz2 = z2 * 100.0f;
-                float px3 = x3 * 100.0f; float py3 = -y3 * 100.0f; float pz3 = z3 * 100.0f;
-
-                float pnx1 = nx1; float pny1 = -ny1; float pnz1 = nz1;
-                float pnx2 = nx2; float pny2 = -ny2; float pnz2 = nz2;
-                float pnx3 = nx3; float pny3 = -ny3; float pnz3 = nz3;
-
-                int i1 = GetOrCreateVertex(px1, py1, pz1, pnx1, pny1, pnz1);
-                int i2 = GetOrCreateVertex(px2, py2, pz2, pnx2, pny2, pnz2);
-                int i3 = GetOrCreateVertex(px3, py3, pz3, pnx3, pny3, pnz3);
+                int i1 = GetOrCreateVertexFromCache(v1);
+                int i2 = GetOrCreateVertexFromCache(v2);
+                int i3 = GetOrCreateVertexFromCache(v3);
 
                 var triKey = new TriangleKey(i1, i2, i3);
                 if (_uniqueTriangles.Add(triKey))
@@ -207,6 +193,25 @@ namespace Virtuart4DNavisworks
                 LogStaticError($"Exception in Triangle callback: {ex.Message}\n{ex.StackTrace}");
             }
         }
+
+        private int GetOrCreateVertexFromCache(COMApi.InwSimpleVertex v)
+        {
+            if (_vertexRefCache.TryGetValue(v, out int index))
+            {
+                return index;
+            }
+
+            ProcessVertex(v, out float x, out float y, out float z, out float nx, out float ny, out float nz);
+
+            float px = x * 100.0f;
+            float py = -y * 100.0f;
+            float pz = z * 100.0f;
+
+            index = GetOrCreateVertex(px, py, pz, nx, -ny, nz);
+            _vertexRefCache[v] = index;
+            return index;
+        }
+
 
         private int GetOrCreateVertex(float x, float y, float z, float nx, float ny, float nz)
         {
