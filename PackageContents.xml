@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ApplicationPackage SchemaVersion="1.0" AutodeskProduct="Naviswork" Name="Virtuart4D Navisworks Exporter" Description="Virtuart4D Datasmith exporter for Navisworks" AppVersion="1.0.0" ProductCode="" upgradeCode="">    
+	<CompanyDetails Name="Virtuart4D"/>
+    <Components Description="2025">
+	    <RuntimeRequirements OS="Win64" Platform="NAVMAN|NAVSIM" SeriesMin="Nw22" SeriesMax="Nw22" />
+        <ComponentEntry AppName="Virtuart4D Exporter for Autodesk® Navisworks® 2025" AppType="ManagedPlugin" ModuleName="./Contents/v22/Virtuart4DNavisworks.dll" />
+    </Components>
+</ApplicationPackage>

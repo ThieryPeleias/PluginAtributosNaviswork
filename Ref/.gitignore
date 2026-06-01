@@ -7,7 +7,6 @@ bin/
 
 installer/output/
 installer/staging/Contents/v23/
-installer/staging/Contents/v22/
 installer/staging/ia_config.txt
 
 *.user
