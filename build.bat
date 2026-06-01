@@ -114,6 +114,38 @@ if !errorlevel! neq 0 (
 echo        PackageContents.xml copied to bundle. | powershell -NoProfile -Command "$input | Tee-Object -Append -FilePath '%LOG_FILE%'"
 
 :: -------------------------------------------------------
+:: 5. Deploy Bundle (Copy directly to AppData)
+:: -------------------------------------------------------
+echo.
+echo [5/5] Deploying bundle to Autodesk ApplicationPlugins...
+(echo. && echo [5/5] Deploying bundle to Autodesk ApplicationPlugins...) >> "%LOG_FILE%"
+set "APPDATA_BUNDLE=%APPDATA%\Autodesk\ApplicationPlugins\Virtuart4DNavisworks.bundle"
+
+if exist "%APPDATA_BUNDLE%" (
+    echo        Removing existing AppData bundle folder...
+    (echo        Removing existing AppData bundle folder...) >> "%LOG_FILE%"
+    rmdir /s /q "%APPDATA_BUNDLE%" 2>nul
+    if exist "%APPDATA_BUNDLE%" (
+        echo [ERROR] Failed to remove existing AppData bundle folder. 
+        echo         The DLL file might be locked because Navisworks is currently running.
+        echo         PLEASE CLOSE NAVISWORKS and run build.bat again to apply the changes!
+        (echo [ERROR] Failed to remove existing AppData bundle folder. Navisworks holding lock.) >> "%LOG_FILE%"
+        goto :error
+    )
+)
+
+echo        Deploying fresh copy to AppData...
+(echo        Deploying fresh copy to AppData...) >> "%LOG_FILE%"
+xcopy "%BUNDLE_DIR%" "%APPDATA_BUNDLE%\" /e /y /q /i >nul 2>&1
+if !errorlevel! neq 0 (
+    echo [ERROR] Failed to copy bundle files to AppData folder. 
+    echo         Please close Navisworks and try again.
+    (echo [ERROR] Failed to copy bundle to AppData folder.) >> "%LOG_FILE%"
+    goto :error
+)
+echo        Successfully deployed bundle directly to AppData! | powershell -NoProfile -Command "$input | Tee-Object -Append -FilePath '%LOG_FILE%'"
+
+:: -------------------------------------------------------
 :: Success Output
 :: -------------------------------------------------------
 echo.
@@ -122,12 +154,12 @@ echo  BUILD COMPLETED SUCCESSFULLY!
 echo ============================================================
 (echo. && echo ============================================================ && echo  BUILD COMPLETED SUCCESSFULLY! && echo ============================================================) >> "%LOG_FILE%"
 echo.
-echo  Bundle Location: %BUNDLE_DIR%
+echo  Local Bundle Location: %BUNDLE_DIR%
+echo  Deployed AppData Path: %APPDATA_BUNDLE%
 echo  Build Log saved to: %LOG_FILE%
 echo.
-echo  You can copy "Virtuart4DNavisworks.bundle" directly to:
-echo  %%APPDATA%\Autodesk\ApplicationPlugins\
-echo  to load the plugin in Navisworks Manage 2025.
+echo  The plugin was compiled, assembled, and deployed successfully.
+echo  IMPORTANT: If Navisworks was running, restart it to load the new binary.
 echo.
 goto :success
 

@@ -182,22 +182,32 @@ namespace Virtuart4DNavisworks
                 return;
             }
 
-            if (_settingsForm == null || _settingsForm.IsDisposed)
+            // Defer showing the form by 50ms using a Timer to let AdWindows Ribbon complete its command scope,
+            // which yields execution back to Autodesk Navisworks and fully unblocks the viewport.
+            var timer = new System.Windows.Forms.Timer { Interval = 50 };
+            timer.Tick += (s, e) =>
             {
-                _settingsForm = new ExportSettingsForm();
-                
-                // Get Navisworks main window handle as owner so it floats on top without blocking
-                IWin32Window owner = Autodesk.Navisworks.Api.Application.Gui.MainWindow;
-                _settingsForm.Show(owner);
-            }
-            else
-            {
-                _settingsForm.BringToFront();
-                if (_settingsForm.WindowState == FormWindowState.Minimized)
+                timer.Stop();
+                timer.Dispose();
+
+                if (_settingsForm == null || _settingsForm.IsDisposed)
                 {
-                    _settingsForm.WindowState = FormWindowState.Normal;
+                    _settingsForm = new ExportSettingsForm();
+                    
+                    // Show modeless using Navisworks main window as owner so it floats on top without blocking
+                    IWin32Window owner = Autodesk.Navisworks.Api.Application.Gui.MainWindow;
+                    _settingsForm.Show(owner);
                 }
-            }
+                else
+                {
+                    _settingsForm.BringToFront();
+                    if (_settingsForm.WindowState == FormWindowState.Minimized)
+                    {
+                        _settingsForm.WindowState = FormWindowState.Normal;
+                    }
+                }
+            };
+            timer.Start();
         }
     }
 }
