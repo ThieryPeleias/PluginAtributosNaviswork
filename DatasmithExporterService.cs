@@ -110,7 +110,7 @@ namespace Virtuart4DNavisworks
                     {
                         foreach (ModelItem descendant in root.DescendantsAndSelf)
                         {
-                            if (descendant.HasGeometry && !descendant.IsHidden && actorsMap.ContainsKey(descendant))
+                            if (descendant.HasGeometry && !System.Linq.Enumerable.Any(descendant.Children) && !descendant.IsHidden && actorsMap.ContainsKey(descendant))
                             {
                                 leafCollection.Add(descendant);
                             }
@@ -156,6 +156,11 @@ namespace Virtuart4DNavisworks
 
                                 dynamic fragsColl = path.Fragments();
                                 int fragsCount = fragsColl.Count;
+
+                                if (fragsCount > 1)
+                                {
+                                    Log($"[Diag] Leaf actor '{actorMesh.GetName()}' has {fragsCount} fragments.");
+                                }
 
                                 for (int f = 1; f <= fragsCount; f++)
                                 {
@@ -270,7 +275,7 @@ namespace Virtuart4DNavisworks
 
             FDatasmithFacadeActor currentActor = null;
 
-            if (item.HasGeometry)
+            if (item.HasGeometry && !System.Linq.Enumerable.Any(item.Children))
             {
                 currentActor = new FDatasmithFacadeActorMesh(cleanName);
             }
