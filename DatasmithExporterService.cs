@@ -34,7 +34,7 @@ namespace Virtuart4DNavisworks
         /// Exports the active Navisworks document to a Datasmith file using the hybrid delegation pipeline.
         /// </summary>
         /// <param name="doc">The active Navisworks Document.</param>
-        /// <param name="filePath">Target .udatasmith file path.</param>
+        /// <param name="filePath">Target .udatasmith file path (if null or empty, Epic's dialog will prompt).</param>
         /// <param name="mergeMaxDepth">The maximum hierarchy depth to merge subtrees (0 = no merging).</param>
         /// <param name="originX">Custom origin X coordinate in Navisworks space.</param>
         /// <param name="originY">Custom origin Y coordinate in Navisworks space.</param>
@@ -48,10 +48,26 @@ namespace Virtuart4DNavisworks
             double originY = 0, 
             double originZ = 0)
         {
-            if (doc == null || string.IsNullOrEmpty(filePath)) return false;
+            if (doc == null) return false;
 
-            string outputDir = Path.GetDirectoryName(filePath);
-            string sceneName = Path.GetFileNameWithoutExtension(filePath);
+            // If filePath is empty or null, we suggest the default name in the doc's folder
+            string defaultName = "";
+            string defaultDir = "";
+            if (!string.IsNullOrEmpty(doc.FileName))
+            {
+                defaultName = Path.GetFileNameWithoutExtension(doc.FileName) + ".udatasmith";
+                defaultDir = Path.GetDirectoryName(doc.FileName);
+            }
+            else
+            {
+                defaultName = "Export.udatasmith";
+                defaultDir = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            }
+
+            string exportFilePath = string.IsNullOrEmpty(filePath) ? Path.Combine(defaultDir, defaultName) : filePath;
+            
+            string outputDir = Path.GetDirectoryName(exportFilePath);
+            string sceneName = Path.GetFileNameWithoutExtension(exportFilePath);
             _logPath = Path.Combine(outputDir, sceneName + "_export.log");
 
             // Initialize or clear log file
@@ -63,7 +79,7 @@ namespace Virtuart4DNavisworks
 
             Log("=================================================================");
             Log($"Starting Virtuart4D Datasmith Export (Hybrid Model) for: {doc.Title}");
-            Log($"Target File: {filePath}");
+            Log($"Target File (Default/User): {exportFilePath}");
             Log($"Merge Depth: {mergeMaxDepth} | Origin: ({originX}, {originY}, {originZ})");
             Log("=================================================================");
 
@@ -90,13 +106,13 @@ namespace Virtuart4DNavisworks
                     return false;
                 }
 
-                Log("Executing Epic Games Datasmith Exporter silently...");
+                Log("Executing Epic Games Datasmith Exporter silently/prompting if GUI...");
                 
                 // Format parameters with dot (.) as decimal separator for invariant culture parsing
                 string originStr = string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0},{1},{2}", originX, originY, originZ);
                 string[] parameters = new string[]
                 {
-                    filePath,
+                    exportFilePath,
                     $"Merge={mergeMaxDepth}",
                     $"Origin={originStr}"
                 };
@@ -105,17 +121,30 @@ namespace Virtuart4DNavisworks
                 int exitCode = plugin.Execute(parameters);
                 Log($"Epic Games Exporter finished. Exit Code: {exitCode}");
 
-                if (!File.Exists(filePath))
+                // Locate the actually exported file path
+                string resolvedFilePath = null;
+                if (!string.IsNullOrEmpty(filePath) && File.Exists(filePath))
                 {
-                    Log("[ERROR] The .udatasmith file was not created by the exporter.");
+                    resolvedFilePath = filePath;
+                }
+                else
+                {
+                    // Scan current working directory and other common directories for the newly created udatasmith file
+                    resolvedFilePath = FindMostRecentDatasmithFile(defaultDir);
+                }
+
+                if (string.IsNullOrEmpty(resolvedFilePath) || !File.Exists(resolvedFilePath))
+                {
+                    Log("[ERROR] The .udatasmith file was not found after export.");
                     return false;
                 }
 
+                Log($"Located exported file at: {resolvedFilePath}");
                 Log("Step 2/2: Post-processing generated .udatasmith XML to format metadata keys...");
                 try
                 {
                     var xmlDoc = new XmlDocument();
-                    xmlDoc.Load(filePath);
+                    xmlDoc.Load(resolvedFilePath);
                     
                     var kvPs = xmlDoc.GetElementsByTagName("KeyValueProperty");
                     int modifiedKeys = 0;
@@ -132,7 +161,7 @@ namespace Virtuart4DNavisworks
 
                     if (modifiedKeys > 0)
                     {
-                        xmlDoc.Save(filePath);
+                        xmlDoc.Save(resolvedFilePath);
                         Log($"Successfully updated {modifiedKeys} metadata keys to 'Category.Name' format.");
                     }
                     else
@@ -154,6 +183,68 @@ namespace Virtuart4DNavisworks
                 Log($"[CRITICAL ERROR] Export failed: {ex.Message}");
                 Log($"Stack Trace: {ex.StackTrace}");
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// Searches common folders and current working directory for the most recently created .udatasmith file.
+        /// </summary>
+        private static string FindMostRecentDatasmithFile(string defaultDir)
+        {
+            try
+            {
+                var dirsToSearch = new System.Collections.Generic.List<string>();
+                
+                // 1. Current Working Directory is the most likely since FileDialog changes the CWD of the process
+                string cwd = Directory.GetCurrentDirectory();
+                if (Directory.Exists(cwd)) dirsToSearch.Add(cwd);
+                
+                // 2. Default Active Document Directory
+                if (!string.IsNullOrEmpty(defaultDir) && Directory.Exists(defaultDir) && !dirsToSearch.Contains(defaultDir))
+                {
+                    dirsToSearch.Add(defaultDir);
+                }
+
+                // 3. Documents Folder
+                string myDocs = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                if (Directory.Exists(myDocs) && !dirsToSearch.Contains(myDocs))
+                {
+                    dirsToSearch.Add(myDocs);
+                }
+
+                // 4. Desktop
+                string desktop = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                if (Directory.Exists(desktop) && !dirsToSearch.Contains(desktop))
+                {
+                    dirsToSearch.Add(desktop);
+                }
+
+                string bestFile = null;
+                DateTime bestTime = DateTime.MinValue;
+
+                foreach (string dir in dirsToSearch)
+                {
+                    try
+                    {
+                        foreach (string file in Directory.GetFiles(dir, "*.udatasmith"))
+                        {
+                            var fi = new FileInfo(file);
+                            // Must have been modified in the last 40 seconds
+                            if (fi.LastWriteTime > bestTime && fi.LastWriteTime > DateTime.Now.AddSeconds(-40))
+                            {
+                                bestTime = fi.LastWriteTime;
+                                bestFile = file;
+                            }
+                        }
+                    }
+                    catch { }
+                }
+
+                return bestFile;
+            }
+            catch
+            {
+                return null;
             }
         }
     }

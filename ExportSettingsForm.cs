@@ -342,56 +342,40 @@ namespace Virtuart4DNavisworks
                 return;
             }
 
-            using (var sfd = new SaveFileDialog())
+            try
             {
-                sfd.Title = "Export to Unreal Engine Datasmith";
-                sfd.Filter = "Unreal Datasmith (*.udatasmith)|*.udatasmith";
-                sfd.DefaultExt = "udatasmith";
+                System.Windows.Forms.Cursor.Current = Cursors.WaitCursor;
+                btnExport.Enabled = false;
+                btnCancel.Enabled = false;
 
-                // Suggest current file name
-                if (!string.IsNullOrEmpty(doc.FileName))
+                // Run optimized export (Epic's plugin will show the single SaveFileDialog natively)
+                bool success = DatasmithExporterService.ExportActiveDocument(doc, null, mergeDepth, ox, oy, oz);
+
+                System.Windows.Forms.Cursor.Current = Cursors.Default;
+                btnExport.Enabled = true;
+                btnCancel.Enabled = true;
+
+                if (success)
                 {
-                    sfd.FileName = Path.GetFileNameWithoutExtension(doc.FileName);
+                    MessageBox.Show("Datasmith export completed successfully!",
+                        "Virtuart4D Exporter", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    DialogResult = DialogResult.OK;
+                    Close();
                 }
-
-                if (sfd.ShowDialog() == DialogResult.OK)
+                else
                 {
-                    try
-                    {
-                        System.Windows.Forms.Cursor.Current = Cursors.WaitCursor;
-                        btnExport.Enabled = false;
-                        btnCancel.Enabled = false;
-
-                        // Run optimized export with parameters
-                        bool success = DatasmithExporterService.ExportActiveDocument(doc, sfd.FileName, mergeDepth, ox, oy, oz);
-
-                        System.Windows.Forms.Cursor.Current = Cursors.Default;
-                        btnExport.Enabled = true;
-                        btnCancel.Enabled = true;
-
-                        if (success)
-                        {
-                            MessageBox.Show("Datasmith export completed successfully!",
-                                "Virtuart4D Exporter", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            DialogResult = DialogResult.OK;
-                            Close();
-                        }
-                        else
-                        {
-                            MessageBox.Show("Datasmith export failed. Please check log details.",
-                                "Virtuart4D Exporter", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Windows.Forms.Cursor.Current = Cursors.Default;
-                        btnExport.Enabled = true;
-                        btnCancel.Enabled = true;
-
-                        MessageBox.Show($"An error occurred during export:\n{ex.Message}",
-                            "Virtuart4D Exporter", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
+                    MessageBox.Show("Datasmith export failed. Please check log details.",
+                        "Virtuart4D Exporter", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.Forms.Cursor.Current = Cursors.Default;
+                btnExport.Enabled = true;
+                btnCancel.Enabled = true;
+
+                MessageBox.Show($"An error occurred during export:\n{ex.Message}",
+                    "Virtuart4D Exporter", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
