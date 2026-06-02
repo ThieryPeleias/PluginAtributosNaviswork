@@ -78,6 +78,14 @@ Conformance > taste inside codebase. Convention harmful → surface it. Don't fo
 - Once the export completes in **~1 second**, our C# code uses a smart CWD and directory fallback scan (`FindMostRecentDatasmithFile`) to locate the exported `.udatasmith` file.
 - We then run a high-speed XML post-processor (`System.Xml.XmlDocument`) that scans `<KeyValueProperty>` tags and replaces all `*` separators with a dot `.` in the `name` attribute, transforming `Item*Layer` into the custom `Item.Layer` metadata keys.
 
+### 4. Precision Viewport Snapping Architecture
+- **Interactive Tool Plugin:** We implement dynamic viewport coordinate picking through a custom `ToolPlugin` class (`PickPointTool.cs`) registered as `"PickPointTool.Virtuart4D"`.
+- **Real-Time Hover Snaps:** The tool captures mouse movement via `MouseMove` and computes real-time vertex snapping by querying `view.PickItemFromPoint(x, y)` to get the intersected 3D point and `ModelItem`.
+- **COM Geometry Extraction:** We convert the hovered/selected `ModelItem` to a COM path using `ComApiBridge.ToInwOaPath(item)`, then call `GenerateSimplePrimitives` with a callback class inheriting from `InwSimplePrimitivesCB` to harvest all vertex primitives.
+- **World Space Projection:** We transform the local coordinates of the harvested vertices using the fragment's `GetLocalToWorldMatrix()` and find the closest mathematical vertex to the mouse-hovered 3D coordinate (yielding exact snap precision).
+- **Custom Viewport Rendering:** In `OverlayRender(View view, Graphics graphics)`, we call `graphics.BeginWindowContext()` to draw custom 2D screen-space overlays: a high-precision RGB axis (red/green crosshair + blue box) at the snapped point, and a semi-transparent purple-bordered tooltip card detailing the `Item Name` and `Item Type` of the hovered model.
+- **Event Notification & Disposing:** A static event `PointPicked` notifies the settings form upon left-mouse click completion, returning the view tool back to standard selection (`Tool.Select`) and unsubscribing cleanly to avoid leaks.
+
 ### 5. Autodesk Bundle Layout & Local Deployment
 - Local active builds are output to the Autodesk local plugins bundle folder: `%APPDATA%\Autodesk\ApplicationPlugins\Virtuart4DNavisworks.bundle\`.
 - Keep `PackageContents.xml` in the bundle's root mapping compatibilities to Navisworks 2025 series `Nw22` and pointing to `Contents/v22/Virtuart4DNavisworks.dll`.

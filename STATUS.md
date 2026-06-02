@@ -7,7 +7,7 @@ This document summarizes the current state of the project, documenting the activ
 ## 1. Project Status Summary
 
 - **Compilation:** **100% Successful** (0 errors, 0 warnings) targeting **.NET Framework 4.8** using the dotnet CLI.
-- **UI Integration:** Fully operational. Modeless settings window (`ExportSettingsForm.cs`) unblocks the Navisworks viewport with a 50ms deferred timer. Selection center picking dynamically updates coordinates in real-time.
+- **UI Integration & Snapping:** Fully operational. Modeless settings window (`ExportSettingsForm.cs`) unblocks the Navisworks viewport with a 50ms deferred timer. Supports both bounding box Selection Center picking and real-time high-precision Viewport Vertex Snapping (crosshair axes + item metadata tooltip card overlay).
 - **Save File Dialog:** Leverages Epic's official, native SaveFileDialog directly, eliminating duplicate file dialog popups in GUI mode.
 - **Git Alignment:** Fully configured remotes synchronized:
   - **Gitea:** `http://192.168.255.109:3003/Virtuart4D/Virtuart4DNavisworks.git`
@@ -36,5 +36,6 @@ We completely resolved all geometry, scale, rotation, instancing, and speed issu
 ## 3. Active Code Base Reference Links
 
 - **Core Exporter Service:** [DatasmithExporterService.cs](file:///e:/@Virtuart/Claude/Projetos/Virtuart4DNavisworks/DatasmithExporterService.cs) — Handles locating, loading, and silently executing the official exporter plugin, directory scanning fallback, and XML post-processing.
-- **Settings Dialog UI:** [ExportSettingsForm.cs](file:///e:/@Virtuart/Claude/Projetos/Virtuart4DNavisworks/ExportSettingsForm.cs) — Modeless floating settings form with purple theme, unblocking viewport, selection center picking, and direct trigger invocation.
+- **Settings Dialog UI:** [ExportSettingsForm.cs](file:///e:/@Virtuart/Claude/Projetos/Virtuart4DNavisworks/ExportSettingsForm.cs) — Modeless floating settings form with purple theme, unblocking viewport, selection center picking, high-precision vertex snapping activation, and direct trigger invocation.
+- **Precision Vertex Snap Tool:** [PickPointTool.cs](file:///e:/@Virtuart/Claude/Projetos/Virtuart4DNavisworks/PickPointTool.cs) — Custom interactive `ToolPlugin` with high-precision RGB axis overlay rendering, parent/item description tooltip card, and dynamic COM-level mathematical snapping to closest mesh vertex.
 - **Ribbon Entry:** [Virtuart4DPlugin.cs](file:///e:/@Virtuart/Claude/Projetos/Virtuart4DNavisworks/Virtuart4DPlugin.cs) — Ribbon registration with WPF icons and modeless timer launch.
