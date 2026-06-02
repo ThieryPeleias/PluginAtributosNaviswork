@@ -70,10 +70,10 @@ namespace Virtuart4DNavisworks
             try
             {
                 Log("Step 1/2: Locating Epic Games Datasmith Exporter Plugin...");
-                var pluginRecord = Autodesk.Navisworks.Api.Application.Plugins.FindPlugin("ExporterPlugin.EpicGames");
+                var pluginRecord = Autodesk.Navisworks.Api.Application.Plugins.FindPlugin("DatasmithNavisworksExporter.EpicGames");
                 if (pluginRecord == null)
                 {
-                    Log("[ERROR] Epic Games Datasmith Exporter Plugin (ExporterPlugin.EpicGames) not found in Navisworks!");
+                    Log("[ERROR] Epic Games Datasmith Exporter Plugin (DatasmithNavisworksExporter.EpicGames) not found in Navisworks!");
                     return false;
                 }
 
