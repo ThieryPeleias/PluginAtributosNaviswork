@@ -71,21 +71,12 @@ Conformance > taste inside codebase. Convention harmful → surface it. Don't fo
 - **Navisworks Manage 2025 APIs:** `C:\Program Files\Autodesk\Navisworks Manage 2025\`
 - **Epic Games Datasmith C# Facade SDK:** `C:\ProgramData\Autodesk\ApplicationPlugins\EpicGamesDatasmithExporter.bundle\`
 
-### 3. Geometry Extraction Logic (COM API)
-- The Navisworks native .NET API does not expose low-level geometry; use the **COM API** instead (`Autodesk.Navisworks.Api.ComApi.ComApiBridge` to cast selections to `InwOpSelection`).
-- Iterate over fragments (`InwOaFragment3`) and call `GenerateSimplePrimitives` by implementing the `InwSimplePrimitivesCB` callback interface.
-- Retrieve the fragment's matrix (`GetLocalToWorldMatrix()`) and extract its 16 float elements in row-major format using late-bound dynamic COM binding (`dynamic.Matrix`).
-- **Coordinate System Conversion:** 
-  - Scale coordinates by `100.0f` to convert from Navisworks meters to Unreal Engine centimeters.
-  - Invert the Y-axis (`-y`) to transform from Navisworks Right-Handed Z-Up to Unreal Engine Left-Handed Z-Up coordinate space.
-
-### 4. Scene Graph & Metadata Mapping
-- Build the scene graph hierarchically: empty grouping nodes map to `FDatasmithFacadeActor` and items containing geometry map to `FDatasmithFacadeActorMesh`.
-- **STRICT DIRECTIVE:** You must maintain the exact tree hierarchy and world-coordinate baking logic. Parents must always be `FDatasmithFacadeActor`, leaf geometry nodes must be `FDatasmithFacadeActorMesh`, and local-to-world transforms must be baked directly into the vertices inside `DatasmithGeometryCallback.cs` (by passing the fragment matrix to the callback constructor), leaving the actor transform as identity. **NEVER** decompose matrices, restructure fragment actor nodes, or change this mapping, as it breaks spatial positioning and centers all meshes at the origin.
-- **PERFORMANCE LIMITATION & CODE FREEZE:** The export speed (e.g. ~2 minutes for the Mauro model) is a known and permanent limitation of the legacy Navisworks COM API marshalling overhead when invoking `GenerateSimplePrimitives` on elements with high fragment densities (like curved roof tiles). All possible C# level optimizations (SafeArray `CopyTo` direct memory copying and COM vertex wrapper caching `_vertexRefCache` in `DatasmithGeometryCallback.cs`) have been fully implemented. **Under no circumstances should the plugin source code be modified to optimize this speed further**, as any attempts at transform decomposition, hierarchy restructuring, or relative-space instancing will corrupt the spatial alignments (such as `Mullion Telha Colonial`) and distort the export. The geometry extraction code is frozen and final.
-
-- Map **all** properties and custom attributes by concatenating `CategoryName.PropertyName` into strings and creating `FDatasmithFacadeMetaData` objects.
-- Associate metadata dynamically with actors using `metaData.SetAssociatedElement(actor)` and add them to the scene using `scene.AddMetaData(metaData)`.
+### 3. Hybrid Exporter Architecture (1-Second Speed & Coordinate Correctness)
+- We avoid slow C# COM geometry extraction (which takes ~3 minutes and has scale/rotation bugs) by silently delegating the export to Epic's official native C++ plugin record `"DatasmithNavisworksExporter.EpicGames"`.
+- We pass custom settings (`MergeMaxDepth` and `Origin`) as command-line parameter strings: `filePath`, `$"Merge={mergeMaxDepth}"`, and `$"Origin={originX},{originY},{originZ}"`.
+- Since `Application.IsAutomated` is `false` in interactive GUI mode, Epic's exporter will always prompt for the target path via its own native `SaveFileDialog`. To avoid duplicate dialogs, we removed the local `SaveFileDialog` from our settings form (`ExportSettingsForm.cs`) and let the user interact solely with the official SaveFileDialog.
+- Once the export completes in **~1 second**, our C# code uses a smart CWD and directory fallback scan (`FindMostRecentDatasmithFile`) to locate the exported `.udatasmith` file.
+- We then run a high-speed XML post-processor (`System.Xml.XmlDocument`) that scans `<KeyValueProperty>` tags and replaces all `*` separators with a dot `.` in the `name` attribute, transforming `Item*Layer` into the custom `Item.Layer` metadata keys.
 
 ### 5. Autodesk Bundle Layout & Local Deployment
 - Local active builds are output to the Autodesk local plugins bundle folder: `%APPDATA%\Autodesk\ApplicationPlugins\Virtuart4DNavisworks.bundle\`.
