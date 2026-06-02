@@ -15,6 +15,11 @@ namespace Virtuart4DNavisworks
     {
         public static event Action<Point3D> PointPicked;
 
+        public override Cursor GetCursor(View view, KeyModifiers modifier)
+        {
+            return Cursor.MeasureVertex;
+        }
+
         public override bool MouseDown(View view, KeyModifiers modifiers, ushort button, int x, int y, double timeOffset)
         {
             if (button == 1) // Left click
