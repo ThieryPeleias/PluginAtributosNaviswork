@@ -17,11 +17,11 @@ namespace Virtuart4DNavisworks
             public static readonly System.Drawing.Color Surface = System.Drawing.Color.White;
             public static readonly System.Drawing.Color SurfaceHover = System.Drawing.Color.FromArgb(250, 251, 254);
 
-            // Primary — Sleek Datasmith Purple (trust, action, modern)
-            public static readonly System.Drawing.Color Primary = System.Drawing.Color.FromArgb(108, 92, 168);      // #6C5CA8
-            public static readonly System.Drawing.Color PrimaryHover = System.Drawing.Color.FromArgb(88, 72, 148);  // #584894
-            public static readonly System.Drawing.Color PrimaryLight = System.Drawing.Color.FromArgb(138, 122, 198); // #8A7AC6
-            public static readonly System.Drawing.Color PrimaryVeryLight = System.Drawing.Color.FromArgb(240, 238, 248); // #F0EEF8
+            // Primary — Sleek Datasmith Cyan/Teal (trust, action, modern)
+            public static readonly System.Drawing.Color Primary = System.Drawing.Color.FromArgb(0, 117, 134);      // #007586
+            public static readonly System.Drawing.Color PrimaryHover = System.Drawing.Color.FromArgb(0, 97, 114);  // #006172
+            public static readonly System.Drawing.Color PrimaryLight = System.Drawing.Color.FromArgb(0, 137, 154); // #00899A
+            public static readonly System.Drawing.Color PrimaryVeryLight = System.Drawing.Color.FromArgb(225, 243, 245); // #E1F3F5
 
             // Success — Green (confirmation, complete)
             public static readonly System.Drawing.Color Success = System.Drawing.Color.FromArgb(27, 131, 96);       // #1B8360
@@ -174,7 +174,7 @@ namespace Virtuart4DNavisworks
                 {
                     Text = subtitle,
                     Font = Typography.BodySmall,
-                    ForeColor = System.Drawing.Color.FromArgb(220, 210, 255),
+                    ForeColor = System.Drawing.Color.FromArgb(200, 240, 245),
                     AutoSize = true,
                     Location = new Point(24, 54)
                 };

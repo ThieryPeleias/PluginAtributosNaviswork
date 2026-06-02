@@ -14,6 +14,26 @@ namespace Virtuart4DNavisworks
     public class PickPointTool : ToolPlugin
     {
         public static event Action<Point3D> PointPicked;
+        public static event Action SelectionCancelled;
+        public static PickPointTool Instance { get; private set; }
+
+        public PickPointTool()
+        {
+            Instance = this;
+        }
+
+        public static void ClearActiveOverlay()
+        {
+            if (Instance != null)
+            {
+                Instance._hasSnap = false;
+                try
+                {
+                    Autodesk.Navisworks.Api.Application.ActiveDocument?.ActiveView?.RequestDelayedRedraw(ViewRedrawRequests.OverlayRender);
+                }
+                catch { }
+            }
+        }
 
         private Point3D _currentSnappedPoint;
         private string _currentItemName = "";
@@ -108,14 +128,15 @@ namespace Virtuart4DNavisworks
                         // 2. Draw a clean, stylish tooltip card showing element attributes
                         string textLine1 = $"Item Name: {_currentItemName}";
                         string textLine2 = $"Item Type: {_currentItemType}";
+                        string textLine3 = "Click to snap vertex";
 
                         // Use a professional typeface
                         TextFontInfo font = new TextFontInfo("Segoe UI", 9, 4, false, false);
                         
                         // Calculate width based on text length (approx 7px per character)
-                        int cardW = Math.Max(textLine1.Length, textLine2.Length) * 7 + 16;
+                        int cardW = Math.Max(Math.Max(textLine1.Length, textLine2.Length), textLine3.Length) * 7 + 16;
                         cardW = Math.Max(cardW, 160);
-                        int cardH = 40;
+                        int cardH = 56;
 
                         // Offset the tooltip card slightly bottom-right from the cursor
                         int cardX = sx + 15;
@@ -125,9 +146,9 @@ namespace Virtuart4DNavisworks
                         graphics.Color(Autodesk.Navisworks.Api.Color.FromByteRGB(255, 255, 255), 0.9);
                         graphics.Rectangle(new Point2D(cardX, cardY), new Point2D(cardX + cardW, cardY + cardH), true);
 
-                        // Card border (Datasmith sleek purple)
+                        // Card border (Datasmith sleek cyan/teal)
                         graphics.LineWidth(1);
-                        graphics.Color(Autodesk.Navisworks.Api.Color.FromByteRGB(108, 92, 168), 1.0);
+                        graphics.Color(Autodesk.Navisworks.Api.Color.FromByteRGB(0, 117, 134), 1.0);
                         graphics.Line(new Point3D(cardX, cardY, 0), new Point3D(cardX + cardW, cardY, 0));
                         graphics.Line(new Point3D(cardX + cardW, cardY, 0), new Point3D(cardX + cardW, cardY + cardH, 0));
                         graphics.Line(new Point3D(cardX + cardW, cardY + cardH, 0), new Point3D(cardX, cardY + cardH, 0));
@@ -137,6 +158,9 @@ namespace Virtuart4DNavisworks
                         graphics.Color(Autodesk.Navisworks.Api.Color.FromByteRGB(30, 30, 30), 1.0);
                         graphics.Text2D(font, textLine1, new Point2D(cardX + 8, cardY + 6), 0, 0);
                         graphics.Text2D(font, textLine2, new Point2D(cardX + 8, cardY + 22), 0, 0);
+
+                        graphics.Color(Autodesk.Navisworks.Api.Color.FromByteRGB(0, 117, 134), 1.0);
+                        graphics.Text2D(font, textLine3, new Point2D(cardX + 8, cardY + 38), 0, 0);
 
                         // End window context
                         graphics.EndWindowContext();
@@ -186,6 +210,20 @@ namespace Virtuart4DNavisworks
             }
 
             return base.MouseDown(view, modifiers, button, x, y, timeOffset);
+        }
+
+        public override bool KeyDown(View view, KeyModifiers modifiers, ushort key, double timeOffset)
+        {
+            if (key == 27) // Esc key
+            {
+                ClearActiveOverlay();
+
+                Autodesk.Navisworks.Api.Application.ActiveDocument.Tool.Value = Tool.Select;
+
+                SelectionCancelled?.Invoke();
+                return true; // Handled
+            }
+            return base.KeyDown(view, modifiers, key, timeOffset);
         }
 
         private Point3D SnapToNearestVertex(ModelItem item, Point3D targetPoint)

@@ -29,6 +29,7 @@ namespace Virtuart4DNavisworks
         {
             SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
             InitializeUI();
+            RegisterMouseMoveRecursive(this);
         }
 
         private void InitializeUI()
@@ -59,7 +60,7 @@ namespace Virtuart4DNavisworks
             btnCancel.Click += (s, e) => { DialogResult = DialogResult.Cancel; Close(); };
             pnlFooter.Controls.Add(btnCancel);
 
-            btnExport = UITheme.CreateSuccessButton("Export");
+            btnExport = UITheme.CreatePrimaryButton("Export");
             btnExport.Width = 90;
             btnExport.Location = new Point(410, 8);
             btnExport.Click += BtnExport_Click;
@@ -249,10 +250,37 @@ namespace Virtuart4DNavisworks
         private void BtnPickSelected_Click(object sender, EventArgs e)
         {
             var doc = Autodesk.Navisworks.Api.Application.ActiveDocument;
-            if (doc == null || doc.CurrentSelection == null || doc.CurrentSelection.SelectedItems.IsEmpty)
+            if (doc == null) return;
+
+            if (doc.CurrentSelection == null || doc.CurrentSelection.SelectedItems.IsEmpty)
             {
-                MessageBox.Show("Please select an element or group in Navisworks first.",
-                    "Virtuart4D Exporter", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                try
+                {
+                    var record = (Autodesk.Navisworks.Api.Plugins.ToolPluginRecord)
+                        Autodesk.Navisworks.Api.Application.Plugins.FindPlugin("PickElementCenterTool.Virtuart4D");
+                    if (record != null)
+                    {
+                        PickElementCenterTool.ElementPicked -= PickElementCenterTool_ElementPicked;
+                        PickElementCenterTool.ElementPicked += PickElementCenterTool_ElementPicked;
+                        PickElementCenterTool.SelectionCancelled -= PickTool_Cancelled;
+                        PickElementCenterTool.SelectionCancelled += PickTool_Cancelled;
+
+                        Autodesk.Navisworks.Api.Application.MainDocument.Tool.SetCustomToolPlugin(record.LoadPlugin());
+
+                        lblSelectedInfo.Text = "⚡ Click a 3D element in the viewport to pick its center...";
+                        lblSelectedInfo.ForeColor = UITheme.Color.Warning;
+                    }
+                    else
+                    {
+                        MessageBox.Show("Could not load the custom Pick Element Center tool plugin.",
+                            "Virtuart4D Exporter", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Failed to activate element center pick tool: {ex.Message}",
+                        "Virtuart4D Exporter", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
                 return;
             }
 
@@ -321,6 +349,8 @@ namespace Virtuart4DNavisworks
                 {
                     PickPointTool.PointPicked -= PickPointTool_PointPicked;
                     PickPointTool.PointPicked += PickPointTool_PointPicked;
+                    PickPointTool.SelectionCancelled -= PickTool_Cancelled;
+                    PickPointTool.SelectionCancelled += PickTool_Cancelled;
 
                     Autodesk.Navisworks.Api.Application.MainDocument.Tool.SetCustomToolPlugin(record.LoadPlugin());
 
@@ -356,6 +386,87 @@ namespace Virtuart4DNavisworks
 
             lblSelectedInfo.Text = $"✓ Picked vertex at ({point.X:F3}, {point.Y:F3}, {point.Z:F3})";
             lblSelectedInfo.ForeColor = UITheme.Color.Success;
+        }
+
+        private void PickElementCenterTool_ElementPicked(Point3D point, string elementName)
+        {
+            PickElementCenterTool.ElementPicked -= PickElementCenterTool_ElementPicked;
+
+            if (InvokeRequired)
+            {
+                Invoke(new Action<Point3D, string>(PickElementCenterTool_ElementPicked), point, elementName);
+                return;
+            }
+
+            txtOriginX.Text = point.X.ToString("F3");
+            txtOriginY.Text = point.Y.ToString("F3");
+            txtOriginZ.Text = point.Z.ToString("F3");
+
+            lblSelectedInfo.Text = $"✓ Picked center of \"{elementName ?? "Element"}\" at ({point.X:F3}, {point.Y:F3}, {point.Z:F3})";
+            lblSelectedInfo.ForeColor = UITheme.Color.Success;
+        }
+
+        private void PickTool_Cancelled()
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action(PickTool_Cancelled));
+                return;
+            }
+
+            PickPointTool.PointPicked -= PickPointTool_PointPicked;
+            PickPointTool.SelectionCancelled -= PickTool_Cancelled;
+            PickElementCenterTool.ElementPicked -= PickElementCenterTool_ElementPicked;
+            PickElementCenterTool.SelectionCancelled -= PickTool_Cancelled;
+
+            // Clear overlays instantly on cancel
+            PickPointTool.ClearActiveOverlay();
+            PickElementCenterTool.ClearActiveOverlay();
+
+            lblSelectedInfo.Text = "ℹ Selection cancelled.";
+            lblSelectedInfo.ForeColor = UITheme.Color.TextTertiary;
+        }
+
+        private void RegisterMouseMoveRecursive(Control control)
+        {
+            control.MouseMove += FormOrControl_MouseMove;
+            foreach (Control child in control.Controls)
+            {
+                RegisterMouseMoveRecursive(child);
+            }
+        }
+
+        private void FormOrControl_MouseMove(object sender, MouseEventArgs e)
+        {
+            try
+            {
+                var doc = Autodesk.Navisworks.Api.Application.ActiveDocument;
+                if (doc != null && doc.Tool.Value == Tool.CustomToolPlugin)
+                {
+                    PickPointTool.ClearActiveOverlay();
+                    PickElementCenterTool.ClearActiveOverlay();
+                }
+            }
+            catch { }
+        }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == Keys.Escape)
+            {
+                var doc = Autodesk.Navisworks.Api.Application.ActiveDocument;
+                if (doc != null && doc.Tool.Value == Tool.CustomToolPlugin)
+                {
+                    // Restore to standard selection tool
+                    doc.Tool.Value = Tool.Select;
+
+                    // Trigger local cleanup and UI reset
+                    PickTool_Cancelled();
+
+                    return true; // Suppress normal Escape close behavior
+                }
+            }
+            return base.ProcessCmdKey(ref msg, keyData);
         }
 
         private void BtnExport_Click(object sender, EventArgs e)
@@ -448,6 +559,9 @@ namespace Virtuart4DNavisworks
             try
             {
                 PickPointTool.PointPicked -= PickPointTool_PointPicked;
+                PickPointTool.SelectionCancelled -= PickTool_Cancelled;
+                PickElementCenterTool.ElementPicked -= PickElementCenterTool_ElementPicked;
+                PickElementCenterTool.SelectionCancelled -= PickTool_Cancelled;
                 var doc = Autodesk.Navisworks.Api.Application.ActiveDocument;
                 if (doc != null && doc.CurrentSelection != null)
                 {

@@ -71,8 +71,8 @@ namespace Virtuart4DNavisworks
                 ShowText    = true,
                 ShowImage   = true,
                 Orientation = System.Windows.Controls.Orientation.Vertical,
-                LargeImage  = CriarIcone("E", System.Drawing.Color.FromArgb(108, 92, 168)),
-                Image       = CriarIcone16("E", System.Drawing.Color.FromArgb(108, 92, 168))
+                LargeImage  = CriarIcone("E", System.Drawing.Color.FromArgb(0, 117, 134)),
+                Image       = CriarIcone16("E", System.Drawing.Color.FromArgb(0, 117, 134))
             };
             btnExport.CommandHandler = new Virtuart4DCommandHandler();
 
