@@ -12,6 +12,7 @@ namespace Virtuart4DNavisworks
     public static class DatasmithExporterService
     {
         private static string _logPath;
+        private static readonly System.Collections.Generic.List<string> _logBuffer = new System.Collections.Generic.List<string>();
 
         /// <summary>
         /// Writes a timestamped message to both the debug console and the export log file.
@@ -20,11 +21,15 @@ namespace Virtuart4DNavisworks
         {
             try
             {
-                string logMsg = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {message}{Environment.NewLine}";
-                System.Diagnostics.Debug.Write(logMsg);
+                string logMsg = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {message}";
+                System.Diagnostics.Debug.WriteLine(logMsg);
+                lock (_logBuffer)
+                {
+                    _logBuffer.Add(logMsg);
+                }
                 if (!string.IsNullOrEmpty(_logPath))
                 {
-                    File.AppendAllText(_logPath, logMsg);
+                    File.AppendAllText(_logPath, logMsg + Environment.NewLine);
                 }
             }
             catch { }
@@ -46,9 +51,17 @@ namespace Virtuart4DNavisworks
             int mergeMaxDepth = 0, 
             double originX = 0, 
             double originY = 0, 
-            double originZ = 0)
+            double originZ = 0,
+            string originSelectionType = "Default / Manual",
+            string selectedElementName = "None",
+            string selectedElementId = "None")
         {
             if (doc == null) return false;
+
+            lock (_logBuffer)
+            {
+                _logBuffer.Clear();
+            }
 
             // If filePath is empty or null, we suggest the default name in the doc's folder
             string defaultName = "";
@@ -68,19 +81,17 @@ namespace Virtuart4DNavisworks
             
             string outputDir = Path.GetDirectoryName(exportFilePath);
             string sceneName = Path.GetFileNameWithoutExtension(exportFilePath);
-            _logPath = Path.Combine(outputDir, sceneName + "_export.log");
-
-            // Initialize or clear log file
-            try
-            {
-                if (File.Exists(_logPath)) File.Delete(_logPath);
-            }
-            catch { }
+            
+            // Keep logPath as null during execution so we buffer only in memory and do not touch disk files initially
+            _logPath = null;
 
             Log("=================================================================");
             Log($"Starting Virtuart4D Datasmith Export (Hybrid Model) for: {doc.Title}");
             Log($"Target File (Default/User): {exportFilePath}");
-            Log($"Merge Depth: {mergeMaxDepth} | Origin: ({originX}, {originY}, {originZ})");
+            Log($"Merge Depth: {mergeMaxDepth} | Origin: ({originX.ToString("F3", System.Globalization.CultureInfo.InvariantCulture)}, {originY.ToString("F3", System.Globalization.CultureInfo.InvariantCulture)}, {originZ.ToString("F3", System.Globalization.CultureInfo.InvariantCulture)})");
+            Log($"Origin Selection Type: {originSelectionType}");
+            Log($"Selected Element Name: {selectedElementName}");
+            Log($"Selected Element Unique ID: {selectedElementId}");
             Log("=================================================================");
 
             try
@@ -136,10 +147,42 @@ namespace Virtuart4DNavisworks
                 if (string.IsNullOrEmpty(resolvedFilePath) || !File.Exists(resolvedFilePath))
                 {
                     Log("[ERROR] The .udatasmith file was not found after export.");
+                    // Fallback to write failure logs to default file name
+                    string fallbackLogPath = Path.Combine(outputDir, sceneName + "_export.log");
+                    try
+                    {
+                        File.WriteAllLines(fallbackLogPath, _logBuffer.ToArray());
+                    }
+                    catch {}
                     return false;
                 }
 
                 Log($"Located exported file at: {resolvedFilePath}");
+
+                // Dynamic Log Path Renaming & Overwriting based on the actually exported file name
+                string finalOutputDir = Path.GetDirectoryName(resolvedFilePath);
+                string finalSceneName = Path.GetFileNameWithoutExtension(resolvedFilePath);
+                string finalLogPath = Path.Combine(finalOutputDir, finalSceneName + "_export.log");
+
+                _logPath = finalLogPath;
+
+                // Overwrite final log file by deleting if it exists
+                try
+                {
+                    if (File.Exists(finalLogPath)) File.Delete(finalLogPath);
+                }
+                catch { }
+
+                // Write all buffered lines so far to the final log file
+                try
+                {
+                    lock (_logBuffer)
+                    {
+                        File.WriteAllLines(_logPath, _logBuffer.ToArray());
+                    }
+                }
+                catch { }
+
                 Log("Step 2/2: Post-processing generated .udatasmith XML to format metadata keys...");
                 try
                 {
@@ -182,6 +225,18 @@ namespace Virtuart4DNavisworks
             {
                 Log($"[CRITICAL ERROR] Export failed: {ex.Message}");
                 Log($"Stack Trace: {ex.StackTrace}");
+                
+                // If log path was never set (i.e. failed before dialog resolved it),
+                // write the buffer to the default log path so the failure is recorded.
+                if (string.IsNullOrEmpty(_logPath))
+                {
+                    string fallbackLogPath = Path.Combine(outputDir, sceneName + "_export.log");
+                    try
+                    {
+                        File.WriteAllLines(fallbackLogPath, _logBuffer.ToArray());
+                    }
+                    catch {}
+                }
                 return false;
             }
         }

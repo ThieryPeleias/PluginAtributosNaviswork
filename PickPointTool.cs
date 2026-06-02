@@ -13,7 +13,7 @@ namespace Virtuart4DNavisworks
     [Plugin("PickPointTool", "Virtuart4D", DisplayName = "Pick Point Tool", ToolTip = "Pick a point on a 3D vertex")]
     public class PickPointTool : ToolPlugin
     {
-        public static event Action<Point3D> PointPicked;
+        public static event Action<Point3D, ModelItem> PointPicked;
         public static event Action SelectionCancelled;
         public static PickPointTool Instance { get; private set; }
 
@@ -188,11 +188,11 @@ namespace Virtuart4DNavisworks
                         if (clickedItem != null)
                         {
                             Point3D snappedPoint = SnapToNearestVertex(clickedItem, pickedPoint);
-                            PointPicked?.Invoke(snappedPoint);
+                            PointPicked?.Invoke(snappedPoint, clickedItem);
                         }
                         else
                         {
-                            PointPicked?.Invoke(pickedPoint);
+                            PointPicked?.Invoke(pickedPoint, null);
                         }
 
                         // Restore to standard selection tool and clean up

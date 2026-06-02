@@ -14,6 +14,14 @@ namespace Virtuart4DNavisworks
         private static double _cachedOriginY = 0;
         private static double _cachedOriginZ = 0;
 
+        // Origin selection tracking
+        private static string _originSelectionType = "Default / Manual";
+        private static string _selectedElementName = "None";
+        private static string _selectedElementId = "None";
+        private static double _pickedX = 0;
+        private static double _pickedY = 0;
+        private static double _pickedZ = 0;
+
         private NumericUpDown numMergeDepth;
         private TextBox txtOriginX;
         private TextBox txtOriginY;
@@ -310,9 +318,32 @@ namespace Virtuart4DNavisworks
                     txtOriginY.Text = center.Y.ToString("F3");
                     txtOriginZ.Text = center.Z.ToString("F3");
 
-                    string label = doc.CurrentSelection.SelectedItems.Count == 1 
-                        ? doc.CurrentSelection.SelectedItems[0].DisplayName 
-                        : $"{doc.CurrentSelection.SelectedItems.Count} elements";
+                    _pickedX = center.X;
+                    _pickedY = center.Y;
+                    _pickedZ = center.Z;
+
+                    string label = "Element";
+                    string uniqueId = "None";
+                    if (doc.CurrentSelection.SelectedItems.Count == 1)
+                    {
+                        var item = doc.CurrentSelection.SelectedItems[0];
+                        label = item.DisplayName ?? item.ClassDisplayName ?? "Element";
+                        uniqueId = GetModelItemUniqueId(item);
+                    }
+                    else
+                    {
+                        label = $"{doc.CurrentSelection.SelectedItems.Count} elements";
+                        var ids = new System.Collections.Generic.List<string>();
+                        foreach (ModelItem item in doc.CurrentSelection.SelectedItems)
+                        {
+                            ids.Add(GetModelItemUniqueId(item));
+                        }
+                        uniqueId = string.Join(", ", ids);
+                    }
+
+                    _originSelectionType = "Element Center";
+                    _selectedElementName = label;
+                    _selectedElementId = uniqueId;
 
                     lblSelectedInfo.Text = $"✓ Picked origin from center of: \"{label ?? "Element"}\"";
                     lblSelectedInfo.ForeColor = UITheme.Color.Success;
@@ -335,6 +366,12 @@ namespace Virtuart4DNavisworks
             txtOriginX.Text = "0.000";
             txtOriginY.Text = "0.000";
             txtOriginZ.Text = "0.000";
+            _originSelectionType = "Default / Manual";
+            _selectedElementName = "None";
+            _selectedElementId = "None";
+            _pickedX = 0;
+            _pickedY = 0;
+            _pickedZ = 0;
             lblSelectedInfo.Text = "Origin coordinates reset to (0,0,0).";
             lblSelectedInfo.ForeColor = UITheme.Color.TextSecondary;
         }
@@ -370,13 +407,13 @@ namespace Virtuart4DNavisworks
             }
         }
 
-        private void PickPointTool_PointPicked(Point3D point)
+        private void PickPointTool_PointPicked(Point3D point, ModelItem item)
         {
             PickPointTool.PointPicked -= PickPointTool_PointPicked;
 
             if (InvokeRequired)
             {
-                Invoke(new Action<Point3D>(PickPointTool_PointPicked), point);
+                Invoke(new Action<Point3D, ModelItem>(PickPointTool_PointPicked), point, item);
                 return;
             }
 
@@ -384,17 +421,33 @@ namespace Virtuart4DNavisworks
             txtOriginY.Text = point.Y.ToString("F3");
             txtOriginZ.Text = point.Z.ToString("F3");
 
-            lblSelectedInfo.Text = $"✓ Picked vertex at ({point.X:F3}, {point.Y:F3}, {point.Z:F3})";
+            _pickedX = point.X;
+            _pickedY = point.Y;
+            _pickedZ = point.Z;
+
+            string name = "Element";
+            string uniqueId = "None";
+            if (item != null)
+            {
+                name = item.DisplayName ?? item.ClassDisplayName ?? "Element";
+                uniqueId = GetModelItemUniqueId(item);
+            }
+
+            _originSelectionType = "Vertex";
+            _selectedElementName = name;
+            _selectedElementId = uniqueId;
+
+            lblSelectedInfo.Text = $"✓ Picked vertex of \"{name}\" at ({point.X:F3}, {point.Y:F3}, {point.Z:F3})";
             lblSelectedInfo.ForeColor = UITheme.Color.Success;
         }
 
-        private void PickElementCenterTool_ElementPicked(Point3D point, string elementName)
+        private void PickElementCenterTool_ElementPicked(Point3D point, ModelItem item)
         {
             PickElementCenterTool.ElementPicked -= PickElementCenterTool_ElementPicked;
 
             if (InvokeRequired)
             {
-                Invoke(new Action<Point3D, string>(PickElementCenterTool_ElementPicked), point, elementName);
+                Invoke(new Action<Point3D, ModelItem>(PickElementCenterTool_ElementPicked), point, item);
                 return;
             }
 
@@ -402,7 +455,23 @@ namespace Virtuart4DNavisworks
             txtOriginY.Text = point.Y.ToString("F3");
             txtOriginZ.Text = point.Z.ToString("F3");
 
-            lblSelectedInfo.Text = $"✓ Picked center of \"{elementName ?? "Element"}\" at ({point.X:F3}, {point.Y:F3}, {point.Z:F3})";
+            _pickedX = point.X;
+            _pickedY = point.Y;
+            _pickedZ = point.Z;
+
+            string name = "Element";
+            string uniqueId = "None";
+            if (item != null)
+            {
+                name = item.DisplayName ?? item.ClassDisplayName ?? "Element";
+                uniqueId = GetModelItemUniqueId(item);
+            }
+
+            _originSelectionType = "Element Center";
+            _selectedElementName = name;
+            _selectedElementId = uniqueId;
+
+            lblSelectedInfo.Text = $"✓ Picked center of \"{name}\" at ({point.X:F3}, {point.Y:F3}, {point.Z:F3})";
             lblSelectedInfo.ForeColor = UITheme.Color.Success;
         }
 
@@ -513,8 +582,26 @@ namespace Virtuart4DNavisworks
                 btnExport.Enabled = false;
                 btnCancel.Enabled = false;
 
+                // Validate if manually edited coords still match picked coords
+                bool coordsMatchPicked = Math.Abs(ox - _pickedX) < 0.001 &&
+                                         Math.Abs(oy - _pickedY) < 0.001 &&
+                                         Math.Abs(oz - _pickedZ) < 0.001;
+
+                string finalSelectionType = coordsMatchPicked ? _originSelectionType : "Default / Manual";
+                string finalElementName = coordsMatchPicked ? _selectedElementName : "None";
+                string finalElementId = coordsMatchPicked ? _selectedElementId : "None";
+
                 // Run optimized export (Epic's plugin will show the single SaveFileDialog natively)
-                bool success = DatasmithExporterService.ExportActiveDocument(doc, null, mergeDepth, ox, oy, oz);
+                bool success = DatasmithExporterService.ExportActiveDocument(
+                    doc, 
+                    null, 
+                    mergeDepth, 
+                    ox, 
+                    oy, 
+                    oz,
+                    finalSelectionType,
+                    finalElementName,
+                    finalElementId);
 
                 System.Windows.Forms.Cursor.Current = Cursors.Default;
                 btnExport.Enabled = true;
@@ -552,6 +639,45 @@ namespace Virtuart4DNavisworks
                 return;
             }
             UpdateSelectionInfo();
+        }
+
+        private static string GetModelItemUniqueId(ModelItem item)
+        {
+            if (item == null) return "None";
+            try
+            {
+                if (item.InstanceGuid != Guid.Empty)
+                {
+                    return item.InstanceGuid.ToString();
+                }
+
+                foreach (var category in item.PropertyCategories)
+                {
+                    foreach (var property in category.Properties)
+                    {
+                        string propName = property.DisplayName;
+                        if (string.Equals(propName, "GUID", StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(propName, "IfcGUID", StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(propName, "UniqueId", StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(propName, "Element ID", StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(propName, "Id", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var val = property.Value;
+                            if (val != null)
+                            {
+                                string valStr = val.ToString();
+                                if (!string.IsNullOrEmpty(valStr))
+                                {
+                                    return valStr;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch { }
+
+            return "Hash_" + item.GetHashCode().ToString();
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)

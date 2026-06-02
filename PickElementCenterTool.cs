@@ -10,7 +10,7 @@ namespace Virtuart4DNavisworks
     [Plugin("PickElementCenterTool", "Virtuart4D", DisplayName = "Pick Element Center Tool", ToolTip = "Pick an element to select its center")]
     public class PickElementCenterTool : ToolPlugin
     {
-        public static event Action<Point3D, string> ElementPicked;
+        public static event Action<Point3D, ModelItem> ElementPicked;
         public static event Action SelectionCancelled;
         public static PickElementCenterTool Instance { get; private set; }
 
@@ -164,9 +164,7 @@ namespace Virtuart4DNavisworks
                         BoundingBox3D box = clickedItem.BoundingBox();
                         Point3D centerPoint = (box != null) ? box.Center : result.Point;
 
-                        string name = clickedItem.DisplayName ?? clickedItem.ClassDisplayName ?? "Element";
-
-                        ElementPicked?.Invoke(centerPoint, name);
+                        ElementPicked?.Invoke(centerPoint, clickedItem);
 
                         // Restore to standard selection tool and clean up
                         _hasTarget = false;
