@@ -18,6 +18,7 @@ namespace Virtuart4DNavisworks
         private TextBox txtOriginX;
         private TextBox txtOriginY;
         private TextBox txtOriginZ;
+        private Button btnPickVertex;
         private Button btnPickSelected;
         private Button btnResetOrigin;
         private Button btnExport;
@@ -175,15 +176,21 @@ namespace Virtuart4DNavisworks
             y += 56;
 
             // Pick / Reset Buttons
+            btnPickVertex = UITheme.CreatePrimaryButton("Pick Vertex with Snap");
+            btnPickVertex.Width = 170;
+            btnPickVertex.Location = new Point(UITheme.Spacing.LG, y);
+            btnPickVertex.Click += BtnPickVertex_Click;
+            card.Controls.Add(btnPickVertex);
+
             btnPickSelected = UITheme.CreatePrimaryButton("Pick Selection Center");
             btnPickSelected.Width = 170;
-            btnPickSelected.Location = new Point(UITheme.Spacing.LG, y);
+            btnPickSelected.Location = new Point(UITheme.Spacing.LG + 178, y);
             btnPickSelected.Click += BtnPickSelected_Click;
             card.Controls.Add(btnPickSelected);
 
             btnResetOrigin = UITheme.CreateSecondaryButton("Reset to Zero");
-            btnResetOrigin.Width = 110;
-            btnResetOrigin.Location = new Point(UITheme.Spacing.LG + 185, y);
+            btnResetOrigin.Width = 100;
+            btnResetOrigin.Location = new Point(UITheme.Spacing.LG + 356, y);
             btnResetOrigin.Click += BtnResetOrigin_Click;
             card.Controls.Add(btnResetOrigin);
 
@@ -304,6 +311,53 @@ namespace Virtuart4DNavisworks
             lblSelectedInfo.ForeColor = UITheme.Color.TextSecondary;
         }
 
+        private void BtnPickVertex_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var record = (Autodesk.Navisworks.Api.Plugins.ToolPluginRecord)
+                    Autodesk.Navisworks.Api.Application.Plugins.FindPlugin("PickPointTool.Virtuart4D");
+                if (record != null)
+                {
+                    PickPointTool.PointPicked -= PickPointTool_PointPicked;
+                    PickPointTool.PointPicked += PickPointTool_PointPicked;
+
+                    Autodesk.Navisworks.Api.Application.MainDocument.Tool.SetCustomToolPlugin(record.LoadPlugin());
+
+                    lblSelectedInfo.Text = "⚡ Click a 3D vertex in the viewport...";
+                    lblSelectedInfo.ForeColor = UITheme.Color.Warning;
+                }
+                else
+                {
+                    MessageBox.Show("Could not load the custom Pick Point tool plugin.",
+                        "Virtuart4D Exporter", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to activate pick tool: {ex.Message}",
+                    "Virtuart4D Exporter", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void PickPointTool_PointPicked(Point3D point)
+        {
+            PickPointTool.PointPicked -= PickPointTool_PointPicked;
+
+            if (InvokeRequired)
+            {
+                Invoke(new Action<Point3D>(PickPointTool_PointPicked), point);
+                return;
+            }
+
+            txtOriginX.Text = point.X.ToString("F3");
+            txtOriginY.Text = point.Y.ToString("F3");
+            txtOriginZ.Text = point.Z.ToString("F3");
+
+            lblSelectedInfo.Text = $"✓ Picked vertex at ({point.X:F3}, {point.Y:F3}, {point.Z:F3})";
+            lblSelectedInfo.ForeColor = UITheme.Color.Success;
+        }
+
         private void BtnExport_Click(object sender, EventArgs e)
         {
             // Parse inputs
@@ -393,6 +447,7 @@ namespace Virtuart4DNavisworks
         {
             try
             {
+                PickPointTool.PointPicked -= PickPointTool_PointPicked;
                 var doc = Autodesk.Navisworks.Api.Application.ActiveDocument;
                 if (doc != null && doc.CurrentSelection != null)
                 {
