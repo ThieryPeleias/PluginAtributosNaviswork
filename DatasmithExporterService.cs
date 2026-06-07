@@ -295,105 +295,135 @@ namespace Virtuart4DNavisworks
 
                             if (descendantActorMeshes.Count == 0) continue;
 
-                            // Collect unique component nodes to move under this parentNode
-                            var uniqueComponentsToGroup = new System.Collections.Generic.HashSet<XmlNode>();
-                            var componentPropertiesMap = new System.Collections.Generic.Dictionary<XmlNode, System.Collections.Generic.Dictionary<string, string>>();
+                            // Group descendant ActorMesh nodes by their combined property key values
+                            var groups = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<XmlNode>>(StringComparer.OrdinalIgnoreCase);
+                            var groupPropertiesMap = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
 
                             foreach (XmlNode meshNode in descendantActorMeshes)
                             {
-                                // Find the parent of the ActorMesh node (which is inside the Children tag of the component Actor)
-                                XmlNode componentNode = meshNode.ParentNode; // Children tag
-                                if (componentNode != null && componentNode.Name == "Children")
-                                {
-                                    componentNode = componentNode.ParentNode; // Component Actor tag
-                                }
+                                string actorName = meshNode.Attributes["name"]?.Value;
+                                if (string.IsNullOrEmpty(actorName)) continue;
 
-                                if (componentNode == null || componentNode.Name != "Actor")
-                                {
-                                    // If there is no intermediate Actor, we group the meshNode itself
-                                    componentNode = meshNode;
-                                }
-
-                                // Avoid grouping the parentNode itself (the anchor node)
-                                if (componentNode == parentNode)
-                                {
-                                    componentNode = meshNode;
-                                }
-
-                                if (uniqueComponentsToGroup.Contains(componentNode)) continue;
-
-                                // Retrieve properties for this componentNode by searching up the tree
+                                // Retrieve properties for this meshNode by searching up the tree from it
                                 var groupProps = new System.Collections.Generic.Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                                 bool hasAnyValue = false;
+                                var values = new System.Collections.Generic.List<string>();
 
                                 foreach (var propPair in groupByProperties)
                                 {
                                     string cat = propPair[0];
                                     string propName = propPair[1];
-                                    string val = GetNodePropertyValue(componentNode, cat, propName, actorMetadata);
+                                    string val = GetNodePropertyValue(meshNode, cat, propName, actorMetadata);
                                     groupProps[$"{cat}.{propName}"] = val;
+                                    values.Add(val);
                                     if (!string.IsNullOrEmpty(val))
                                     {
                                         hasAnyValue = true;
                                     }
                                 }
 
-                                if (hasAnyValue)
+                                if (!hasAnyValue)
                                 {
-                                    uniqueComponentsToGroup.Add(componentNode);
-                                    componentPropertiesMap[componentNode] = groupProps;
+                                    // Keep separate, do not group
+                                    continue;
                                 }
+
+                                string key = string.Join("_", values);
+
+                                if (!groups.TryGetValue(key, out var list))
+                                {
+                                    list = new System.Collections.Generic.List<XmlNode>();
+                                    groups[key] = list;
+                                    groupPropertiesMap[key] = groupProps;
+                                }
+                                list.Add(meshNode);
                             }
 
-                            // Group the identified component nodes under nested folders (Option A)
-                            foreach (XmlNode componentNode in uniqueComponentsToGroup)
+                            // Create new group actor for each unique property value combination as sibling of parentNode
+                            foreach (var kvp in groups)
                             {
-                                var groupProps = componentPropertiesMap[componentNode];
+                                string groupKey = kvp.Key;
+                                var groupNodes = kvp.Value;
+                                var groupProps = groupPropertiesMap[groupKey];
 
-                                // Walk through the properties to find/create the nested folders
-                                XmlNode currentParent = parentNode;
-                                for (int i = 0; i < groupByProperties.Count; i++)
+                                string parentName = parentNode.Attributes["name"]?.Value ?? "Node";
+                                string parentLabel = parentNode.Attributes["label"]?.Value ?? parentName;
+                                string groupActorName = "Group_" + parentName + "_" + CleanXmlAttribute(groupKey);
+                                string groupActorLabel = parentLabel + "_" + CleanXmlAttribute(groupKey);
+
+                                XmlElement newActor = xmlDoc.CreateElement("Actor", xmlDoc.DocumentElement.NamespaceURI);
+                                newActor.SetAttribute("name", groupActorName);
+                                newActor.SetAttribute("label", groupActorLabel);
+
+                                XmlElement transform = xmlDoc.CreateElement("Transform", xmlDoc.DocumentElement.NamespaceURI);
+                                transform.SetAttribute("tx", "0");
+                                transform.SetAttribute("ty", "0");
+                                transform.SetAttribute("tz", "0");
+                                transform.SetAttribute("sx", "1");
+                                transform.SetAttribute("sy", "1");
+                                transform.SetAttribute("sz", "1");
+                                transform.SetAttribute("qx", "0");
+                                transform.SetAttribute("qy", "0");
+                                transform.SetAttribute("qz", "0");
+                                transform.SetAttribute("qw", "1");
+                                newActor.AppendChild(transform);
+
+                                XmlElement childrenElement = xmlDoc.CreateElement("Children", xmlDoc.DocumentElement.NamespaceURI);
+                                newActor.AppendChild(childrenElement);
+
+                                // Move ActorMesh elements under the new group actor
+                                foreach (XmlNode node in groupNodes)
                                 {
-                                    string cat = groupByProperties[i][0];
-                                    string propName = groupByProperties[i][1];
-                                    string propVal = groupProps[$"{cat}.{propName}"];
-
-                                    if (string.IsNullOrEmpty(propVal))
+                                    if (node.ParentNode != null)
                                     {
-                                        propVal = $"No_{propName}";
+                                        node.ParentNode.RemoveChild(node);
                                     }
-
-                                    currentParent = FindOrCreateFolder(xmlDoc, currentParent, propName, propVal, cat, ref groupsCreated);
+                                    childrenElement.AppendChild(node);
+                                    actorsMoved++;
                                 }
 
-                                // Now move componentNode under currentParent's Children tag
-                                XmlNode targetChildren = null;
-                                foreach (XmlNode child in currentParent.ChildNodes)
+                                // Attach the new group actor as a sibling of parentNode
+                                XmlNode parentContainer = parentNode.ParentNode;
+                                if (parentContainer != null)
                                 {
-                                    if (child.Name == "Children")
-                                    {
-                                        targetChildren = child;
-                                        break;
-                                    }
+                                    parentContainer.AppendChild(newActor);
                                 }
+                                groupsCreated++;
 
-                                if (targetChildren == null)
+                                // Create MetaData block for the group actor at the root level
+                                XmlElement newMeta = xmlDoc.CreateElement("MetaData", xmlDoc.DocumentElement.NamespaceURI);
+                                newMeta.SetAttribute("name", "Meta_" + groupActorName);
+                                newMeta.SetAttribute("reference", groupActorName);
+
+                                foreach (var propKvp in groupProps)
                                 {
-                                    targetChildren = xmlDoc.CreateElement("Children", xmlDoc.DocumentElement.NamespaceURI);
-                                    currentParent.AppendChild(targetChildren);
+                                    XmlElement newKvp = xmlDoc.CreateElement("KeyValueProperty", xmlDoc.DocumentElement.NamespaceURI);
+                                    newKvp.SetAttribute("name", propKvp.Key);
+                                    newKvp.SetAttribute("type", "String");
+                                    newKvp.SetAttribute("val", propKvp.Value);
+                                    newMeta.AppendChild(newKvp);
                                 }
 
-                                if (componentNode.ParentNode != null)
-                                {
-                                    componentNode.ParentNode.RemoveChild(componentNode);
-                                }
-
-                                targetChildren.AppendChild(componentNode);
-                                actorsMoved++;
+                                xmlDoc.DocumentElement.AppendChild(newMeta);
                             }
 
                             // Clean up empty folders/actors that are now children of parentNode
                             RemoveEmptyActors(parentNode);
+
+                            // Check if parentNode itself is now empty and can be removed
+                            bool hasActiveChildren = false;
+                            foreach (XmlNode child in parentNode.ChildNodes)
+                            {
+                                if (child.Name == "Children" && child.HasChildNodes)
+                                {
+                                    hasActiveChildren = true;
+                                    break;
+                                }
+                            }
+                            if (!hasActiveChildren && parentNode.ParentNode != null)
+                            {
+                                parentNode.ParentNode.RemoveChild(parentNode);
+                            }
                         }
 
                         Log($"Restructuring complete. Created {groupsCreated} group actor(s) and regrouped {actorsMoved} item(s) by properties.");
