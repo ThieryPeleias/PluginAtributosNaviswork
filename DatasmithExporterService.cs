@@ -93,6 +93,20 @@ namespace Virtuart4DNavisworks
             Log($"Origin Selection Type: {originSelectionType}");
             Log($"Selected Element Name: {selectedElementName}");
             Log($"Selected Element Unique ID: {selectedElementId}");
+
+            if (groupByProperties != null && groupByProperties.Count > 0)
+            {
+                var propStrings = new System.Collections.Generic.List<string>();
+                foreach (var propPair in groupByProperties)
+                {
+                    propStrings.Add($"Category: '{propPair[0]}', Property: '{propPair[1]}'");
+                }
+                Log($"Smart Merging Properties: {string.Join(" | ", propStrings)}");
+            }
+            else
+            {
+                Log("Smart Merging Properties: None (Standard Hierarchy Merging)");
+            }
             Log("=================================================================");
 
             try
@@ -220,7 +234,12 @@ namespace Virtuart4DNavisworks
                     // 2. Perform property-based actor grouping if enabled
                     if (useCustomGrouping)
                     {
-                        Log("Restructuring XML hierarchy by grouping actors with matching custom property values...");
+                        var propKeysLogged = new System.Collections.Generic.List<string>();
+                        foreach (var propPair in groupByProperties)
+                        {
+                            propKeysLogged.Add($"Category: '{propPair[0]}', Property: '{propPair[1]}'");
+                        }
+                        Log($"Restructuring XML hierarchy by grouping actors using Smart Merging on: {string.Join(" | ", propKeysLogged)} (values are omitted)");
                         
                         // Map ActorName -> (Category.Property -> Value)
                         var actorMetadata = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase);

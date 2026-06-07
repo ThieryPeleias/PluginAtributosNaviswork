@@ -328,63 +328,102 @@ namespace Virtuart4DNavisworks
             }
         }
 
+        private void ScanItemProperties(ModelItem item, System.Collections.Generic.HashSet<string> tempCategories, System.Collections.Generic.Dictionary<string, System.Collections.Generic.HashSet<string>> tempProps)
+        {
+            try
+            {
+                if (item.PropertyCategories == null) return;
+
+                foreach (var category in item.PropertyCategories)
+                {
+                    string catName = category.DisplayName ?? category.Name;
+                    if (string.IsNullOrEmpty(catName)) continue;
+
+                    tempCategories.Add(catName);
+
+                    if (!tempProps.TryGetValue(catName, out var props))
+                    {
+                        props = new System.Collections.Generic.HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                        tempProps[catName] = props;
+                    }
+
+                    foreach (var prop in category.Properties)
+                    {
+                        string propName = prop.DisplayName ?? prop.Name;
+                        if (!string.IsNullOrEmpty(propName))
+                        {
+                            props.Add(propName);
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // Ignore errors for individual items
+            }
+        }
+
         private void DiscoverModelProperties()
         {
             try
             {
                 var doc = Autodesk.Navisworks.Api.Application.ActiveDocument;
-                if (doc == null || doc.Models.Count == 0) return;
-
-                var sampleItems = new System.Collections.Generic.List<ModelItem>();
-                
-                // If there's selection, sample from selection first
-                if (doc.CurrentSelection != null && doc.CurrentSelection.SelectedItems.Count > 0)
-                {
-                    foreach (var item in doc.CurrentSelection.SelectedItems)
-                    {
-                        CollectSampleItems(item, sampleItems, 300);
-                        if (sampleItems.Count >= 300) break;
-                    }
-                }
-                
-                // Also sample from main models if we don't have enough selection items
-                if (sampleItems.Count < 100)
-                {
-                    foreach (var model in doc.Models)
-                    {
-                        if (model.RootItem != null)
-                        {
-                            CollectSampleItems(model.RootItem, sampleItems, 300);
-                            if (sampleItems.Count >= 300) break;
-                        }
-                    }
-                }
+                if (doc == null) return;
 
                 var tempCategories = new System.Collections.Generic.HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 var tempProps = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.HashSet<string>>(StringComparer.OrdinalIgnoreCase);
 
-                foreach (var item in sampleItems)
+                // 1. Scan currently selected items to ensure their categories/properties are always discovered first
+                if (doc.CurrentSelection != null && doc.CurrentSelection.SelectedItems.Count > 0)
                 {
-                    if (item == null) continue;
-                    foreach (var category in item.PropertyCategories)
+                    int selectionScanCount = 0;
+                    foreach (ModelItem item in doc.CurrentSelection.SelectedItems)
                     {
-                        string catName = category.DisplayName ?? category.Name;
-                        if (string.IsNullOrEmpty(catName)) continue;
+                        if (item == null) continue;
+                        ScanItemProperties(item, tempCategories, tempProps);
+                        selectionScanCount++;
+                        if (selectionScanCount >= 1000) break; // limit selection scan to prevent UI hangs on huge selections
+                    }
+                }
 
-                        tempCategories.Add(catName);
+                // 2. Scan all loaded models using a calculated step rate to distribute scans evenly across the entire tree
+                if (doc.Models.Count > 0)
+                {
+                    int targetSamplesPerModel = Math.Max(2000, 20000 / doc.Models.Count);
 
-                        if (!tempProps.TryGetValue(catName, out var props))
+                    foreach (Model model in doc.Models)
+                    {
+                        if (model.RootItem == null) continue;
+
+                        int totalItems = 0;
+                        try
                         {
-                            props = new System.Collections.Generic.HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                            tempProps[catName] = props;
+                            totalItems = model.RootItem.DescendantsAndSelf.Count();
+                        }
+                        catch
+                        {
+                            totalItems = 50000; // Fallback if Count() fails
                         }
 
-                        foreach (var prop in category.Properties)
+                        if (totalItems == 0) continue;
+
+                        int step = Math.Max(1, totalItems / targetSamplesPerModel);
+                        int index = 0;
+                        int scanned = 0;
+
+                        foreach (ModelItem item in model.RootItem.DescendantsAndSelf)
                         {
-                            string propName = prop.DisplayName ?? prop.Name;
-                            if (!string.IsNullOrEmpty(propName))
+                            if (item == null) continue;
+
+                            index++;
+                            if (index % step != 0) continue;
+
+                            ScanItemProperties(item, tempCategories, tempProps);
+                            scanned++;
+
+                            if (scanned >= targetSamplesPerModel)
                             {
-                                props.Add(propName);
+                                break;
                             }
                         }
                     }
@@ -400,20 +439,6 @@ namespace Virtuart4DNavisworks
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"[Virtuart4D] Error discovering properties: {ex.Message}");
-            }
-        }
-
-        private void CollectSampleItems(ModelItem item, System.Collections.Generic.List<ModelItem> list, int limit)
-        {
-            if (item == null || list.Count >= limit) return;
-            if (item.HasGeometry && !System.Linq.Enumerable.Any(item.Children))
-            {
-                list.Add(item);
-            }
-            foreach (var child in item.Children)
-            {
-                CollectSampleItems(child, list, limit);
-                if (list.Count >= limit) return;
             }
         }
 
