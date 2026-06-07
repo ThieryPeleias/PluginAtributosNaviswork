@@ -93,4 +93,13 @@ Conformance > taste inside codebase. Convention harmful → surface it. Don't fo
 - Keep `PackageContents.xml` in the bundle's root mapping compatibilities to Navisworks 2025 series `Nw22` and pointing to `Contents/v22/Virtuart4DNavisworks.dll`.
 - **CRITICAL DEPLOYMENT WARNING (AVOID DESYNC LOOP):** After performing git resets, reverting commits, or editing code, **always** execute a clean compilation and redeploy the built bundle to `%APPDATA%\Autodesk\ApplicationPlugins\`. Navisworks **must** be restarted to release any existing DLL file locks and load the new binary. Failing to redeploy and restart leaves Navisworks running cached experimental or broken binaries, creating an endless desync loop where the source code appears correct but the active plugin execution is broken.
 
+### 6. Write Attribute (Sets & Custom Properties)
+- **Feature Overview:** Ported and self-contained implementation of attribute writing.
+- **Redesigned User Interface:** A WinForms modal dialog `WriteAttributeForm.cs` designed using the `UITheme` teal/cyan palette. Swaps the side-by-side layout to present the **Custom Attributes Grid** on the left (60% width) and the **Model Sets Checklist** on the right (40% width).
+- **Header Layout:** Styled header with a height of 100px and custom label positioning (subtitle at Y=46, sub-header details at Y=70) to prevent text overlap and truncation.
+- **Schema & Properties:** Writes attributes under the `Virtuart_Attributes` category and selection sets under the `Virtuart_Sets` property. Employs empty legacy arrays in `VirtuartSchema.cs` to run purely with Virtuart-native attributes.
+- **COM API Compatibility:** Employs reflection inside `ComBridgeHelper` to dynamically call `ComApiBridge.ToInwOpSelection` in runtime, ensuring compatibility across Autodesk Navisworks 2025 and 2026.
+- **Ribbon Tab Integration:** Registers the `Write Attribute` button under a new ribbon panel "Attributes" in the "Virtuart4D" ribbon tab.
+
+
 
