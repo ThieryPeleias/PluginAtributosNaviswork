@@ -2,6 +2,8 @@ using System;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
+using System.Collections.Generic;
+using System.Linq;
 using Autodesk.Navisworks.Api;
 
 namespace Virtuart4DNavisworks
@@ -13,6 +15,11 @@ namespace Virtuart4DNavisworks
         private static double _cachedOriginX = 0;
         private static double _cachedOriginY = 0;
         private static double _cachedOriginZ = 0;
+        private static System.Collections.Generic.List<string[]> _cachedGroupByProperties = new System.Collections.Generic.List<string[]>();
+
+        // Discovered properties of the model
+        private static System.Collections.Generic.List<string> _discoveredCategories = new System.Collections.Generic.List<string>();
+        private static System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<string>> _discoveredProperties = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<string>>(StringComparer.OrdinalIgnoreCase);
 
         // Origin selection tracking
         private static string _originSelectionType = "Default / Manual";
@@ -33,9 +40,13 @@ namespace Virtuart4DNavisworks
         private Button btnCancel;
         private Label lblSelectedInfo;
 
+        private FlowLayoutPanel flpProperties;
+        private Button btnAddProperty;
+
         public ExportSettingsForm()
         {
             SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
+            DiscoverModelProperties();
             InitializeUI();
             RegisterMouseMoveRecursive(this);
         }
@@ -43,9 +54,9 @@ namespace Virtuart4DNavisworks
         private void InitializeUI()
         {
             Text = "Virtuart4D - Export Settings";
-            Size = new Size(520, 560);
-            MinimumSize = new Size(520, 560);
-            MaximumSize = new Size(520, 560);
+            Size = new Size(520, 720);
+            MinimumSize = new Size(520, 720);
+            MaximumSize = new Size(520, 720);
             StartPosition = FormStartPosition.CenterScreen;
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
@@ -230,6 +241,68 @@ namespace Virtuart4DNavisworks
                 }
             }
             catch { }
+
+            y += 26;
+
+            // ── Divider ──
+            var div2 = UITheme.CreateDivider();
+            div2.Location = new Point(UITheme.Spacing.LG, y);
+            div2.Width = 430;
+            card.Controls.Add(div2);
+            y += 16;
+
+            // ── Section 3: Group by Property ──
+            var lblGroupTitle = new Label
+            {
+                Text = "SMART MERGING / GROUPING BY PROPERTIES",
+                Font = UITheme.Typography.Label,
+                ForeColor = UITheme.Color.Primary,
+                Location = new Point(UITheme.Spacing.LG, y),
+                Width = 280,
+                AutoSize = true
+            };
+            card.Controls.Add(lblGroupTitle);
+
+            btnAddProperty = UITheme.CreatePrimaryButton("+ Add Attribute");
+            btnAddProperty.Width = 110;
+            btnAddProperty.Height = 24;
+            btnAddProperty.Font = UITheme.Typography.BodySmall;
+            btnAddProperty.Location = new Point(UITheme.Spacing.LG + 300, y - 4);
+            btnAddProperty.Click += (s, e) => AddPropertyRow();
+            card.Controls.Add(btnAddProperty);
+
+            y += 22;
+
+            var lblGroupHint = new Label
+            {
+                Text = "Restructures udatasmith file: groups geometries under intermediate parent folders\nrepresenting unique combinations of attribute values (e.g. Set A | Phase 1).",
+                Font = UITheme.Typography.BodySmall,
+                ForeColor = UITheme.Color.TextSecondary,
+                Location = new Point(UITheme.Spacing.LG, y),
+                Size = new Size(420, 32)
+            };
+            card.Controls.Add(lblGroupHint);
+            y += 34;
+
+            flpProperties = new FlowLayoutPanel
+            {
+                Location = new Point(UITheme.Spacing.LG, y),
+                Width = 430,
+                Height = 105,
+                FlowDirection = FlowDirection.TopDown,
+                WrapContents = false,
+                AutoScroll = true
+            };
+            card.Controls.Add(flpProperties);
+
+            // Populate cached properties
+            if (_cachedGroupByProperties != null && _cachedGroupByProperties.Count > 0)
+            {
+                foreach (var propPair in _cachedGroupByProperties)
+                {
+                    AddPropertyRow(propPair[0], propPair[1]);
+                }
+            }
         }
 
         private void UpdateSelectionInfo()
@@ -253,6 +326,200 @@ namespace Virtuart4DNavisworks
             {
                 lblSelectedInfo.Text = "";
             }
+        }
+
+        private void DiscoverModelProperties()
+        {
+            try
+            {
+                var doc = Autodesk.Navisworks.Api.Application.ActiveDocument;
+                if (doc == null || doc.Models.Count == 0) return;
+
+                var sampleItems = new System.Collections.Generic.List<ModelItem>();
+                
+                // If there's selection, sample from selection first
+                if (doc.CurrentSelection != null && doc.CurrentSelection.SelectedItems.Count > 0)
+                {
+                    foreach (var item in doc.CurrentSelection.SelectedItems)
+                    {
+                        CollectSampleItems(item, sampleItems, 300);
+                        if (sampleItems.Count >= 300) break;
+                    }
+                }
+                
+                // Also sample from main models if we don't have enough selection items
+                if (sampleItems.Count < 100)
+                {
+                    foreach (var model in doc.Models)
+                    {
+                        if (model.RootItem != null)
+                        {
+                            CollectSampleItems(model.RootItem, sampleItems, 300);
+                            if (sampleItems.Count >= 300) break;
+                        }
+                    }
+                }
+
+                var tempCategories = new System.Collections.Generic.HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                var tempProps = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.HashSet<string>>(StringComparer.OrdinalIgnoreCase);
+
+                foreach (var item in sampleItems)
+                {
+                    if (item == null) continue;
+                    foreach (var category in item.PropertyCategories)
+                    {
+                        string catName = category.DisplayName ?? category.Name;
+                        if (string.IsNullOrEmpty(catName)) continue;
+
+                        tempCategories.Add(catName);
+
+                        if (!tempProps.TryGetValue(catName, out var props))
+                        {
+                            props = new System.Collections.Generic.HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                            tempProps[catName] = props;
+                        }
+
+                        foreach (var prop in category.Properties)
+                        {
+                            string propName = prop.DisplayName ?? prop.Name;
+                            if (!string.IsNullOrEmpty(propName))
+                            {
+                                props.Add(propName);
+                            }
+                        }
+                    }
+                }
+
+                _discoveredCategories = tempCategories.OrderBy(c => c).ToList();
+                _discoveredProperties.Clear();
+                foreach (var kvp in tempProps)
+                {
+                    _discoveredProperties[kvp.Key] = kvp.Value.OrderBy(p => p).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Virtuart4D] Error discovering properties: {ex.Message}");
+            }
+        }
+
+        private void CollectSampleItems(ModelItem item, System.Collections.Generic.List<ModelItem> list, int limit)
+        {
+            if (item == null || list.Count >= limit) return;
+            if (item.HasGeometry && !System.Linq.Enumerable.Any(item.Children))
+            {
+                list.Add(item);
+            }
+            foreach (var child in item.Children)
+            {
+                CollectSampleItems(child, list, limit);
+                if (list.Count >= limit) return;
+            }
+        }
+
+        private void AddPropertyRow(string initialCat = "", string initialProp = "")
+        {
+            if (flpProperties.Controls.Count >= 3)
+            {
+                return;
+            }
+
+            var rowPanel = new Panel
+            {
+                Width = flpProperties.Width - 25,
+                Height = 30,
+                Margin = new Padding(0, 0, 0, 0)
+            };
+
+            var cbCategory = new ComboBox
+            {
+                DropDownStyle = ComboBoxStyle.DropDown,
+                Font = UITheme.Typography.BodySmall,
+                Location = new Point(0, 2),
+                Width = 180
+            };
+
+            var cbProperty = new ComboBox
+            {
+                DropDownStyle = ComboBoxStyle.DropDown,
+                Font = UITheme.Typography.BodySmall,
+                Location = new Point(190, 2),
+                Width = 180
+            };
+
+            var btnDelete = new Button
+            {
+                Text = "×",
+                Font = new Font("Segoe UI", 10f, FontStyle.Bold),
+                ForeColor = System.Drawing.Color.White,
+                BackColor = System.Drawing.Color.FromArgb(183, 28, 28), // UITheme.Color.Error
+                FlatStyle = FlatStyle.Flat,
+                Location = new Point(380, 1),
+                Width = 26,
+                Height = 25,
+                Cursor = Cursors.Hand,
+                TextAlign = ContentAlignment.MiddleCenter
+            };
+            btnDelete.FlatAppearance.BorderSize = 0;
+
+            // Populate Category
+            cbCategory.Items.AddRange(_discoveredCategories.ToArray());
+            if (!string.IsNullOrEmpty(initialCat))
+            {
+                cbCategory.Text = initialCat;
+            }
+            else if (_discoveredCategories.Count > 0)
+            {
+                cbCategory.Text = _discoveredCategories.Contains(VirtuartSchema.CategoriaPrincipal) ? VirtuartSchema.CategoriaPrincipal : _discoveredCategories[0];
+            }
+
+            // Update Properties based on Category
+            Action updateProperties = () =>
+            {
+                string selectedCat = cbCategory.Text;
+                var currentText = cbProperty.Text;
+                cbProperty.Items.Clear();
+                if (_discoveredProperties.TryGetValue(selectedCat, out var props))
+                {
+                    cbProperty.Items.AddRange(props.ToArray());
+                    if (props.Contains(currentText))
+                    {
+                        cbProperty.Text = currentText;
+                    }
+                    else if (props.Count > 0)
+                    {
+                        cbProperty.Text = props[0];
+                    }
+                }
+            };
+
+            cbCategory.SelectedIndexChanged += (s, e) => updateProperties();
+            cbCategory.TextChanged += (s, e) => updateProperties();
+
+            updateProperties();
+            if (!string.IsNullOrEmpty(initialProp))
+            {
+                cbProperty.Text = initialProp;
+            }
+
+            btnDelete.Click += (s, e) =>
+            {
+                flpProperties.Controls.Remove(rowPanel);
+                rowPanel.Dispose();
+                UpdateAddButtonState();
+            };
+
+            rowPanel.Controls.Add(cbCategory);
+            rowPanel.Controls.Add(cbProperty);
+            rowPanel.Controls.Add(btnDelete);
+
+            flpProperties.Controls.Add(rowPanel);
+            UpdateAddButtonState();
+        }
+
+        private void UpdateAddButtonState()
+        {
+            btnAddProperty.Enabled = flpProperties.Controls.Count < 3;
         }
 
         private void BtnPickSelected_Click(object sender, EventArgs e)
@@ -568,6 +835,25 @@ namespace Virtuart4DNavisworks
             _cachedOriginY = oy;
             _cachedOriginZ = oz;
 
+            // Serialize group-by properties
+            var groupBy = new System.Collections.Generic.List<string[]>();
+            foreach (Control ctrl in flpProperties.Controls)
+            {
+                if (ctrl is Panel panel && panel.Controls.Count >= 2)
+                {
+                    if (panel.Controls[0] is ComboBox cbCat && panel.Controls[1] is ComboBox cbProp)
+                    {
+                        string cat = cbCat.Text.Trim();
+                        string prop = cbProp.Text.Trim();
+                        if (!string.IsNullOrEmpty(cat) && !string.IsNullOrEmpty(prop))
+                        {
+                            groupBy.Add(new string[] { cat, prop });
+                        }
+                    }
+                }
+            }
+            _cachedGroupByProperties = groupBy;
+
             var doc = Autodesk.Navisworks.Api.Application.ActiveDocument;
             if (doc == null || doc.IsClear)
             {
@@ -601,7 +887,8 @@ namespace Virtuart4DNavisworks
                     oz,
                     finalSelectionType,
                     finalElementName,
-                    finalElementId);
+                    finalElementId,
+                    groupBy);
 
                 System.Windows.Forms.Cursor.Current = Cursors.Default;
                 btnExport.Enabled = true;
