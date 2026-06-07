@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 using System.Windows.Media.Imaging;
+using Autodesk.Navisworks.Api;
 using Autodesk.Navisworks.Api.Plugins;
 using Autodesk.Windows;
 
@@ -80,6 +82,32 @@ namespace Virtuart4DNavisworks
 
             var panel = new RibbonPanel { Source = panelSource };
             tab.Panels.Add(panel);
+
+            // Panel "Attributes"
+            var panelAttrSource = new RibbonPanelSource
+            {
+                Title = "Attributes",
+                Name  = "Attributes"
+            };
+
+            // Button: Write Attribute
+            var btnWriteAttribute = new RibbonButton
+            {
+                Text        = "Write\nAttribute",
+                Id          = "ID_BTN_WRITE_ATTRIBUTE",
+                Size        = RibbonItemSize.Large,
+                ShowText    = true,
+                ShowImage   = true,
+                Orientation = System.Windows.Controls.Orientation.Vertical,
+                LargeImage  = CriarIcone("W", System.Drawing.Color.FromArgb(0, 117, 134)),
+                Image       = CriarIcone16("W", System.Drawing.Color.FromArgb(0, 117, 134))
+            };
+            btnWriteAttribute.CommandHandler = new Virtuart4DCommandHandler();
+
+            panelAttrSource.Items.Add(btnWriteAttribute);
+
+            var panelAttr = new RibbonPanel { Source = panelAttrSource };
+            tab.Panels.Add(panelAttr);
 
             ribbon.Tabs.Add(tab);
             tab.IsActive = false;
@@ -170,6 +198,10 @@ namespace Virtuart4DNavisworks
             {
                 ExecutarExportacao();
             }
+            else if (btn.Id == "ID_BTN_WRITE_ATTRIBUTE")
+            {
+                ExecutarGravacaoAtributo();
+            }
         }
 
         private void ExecutarExportacao()
@@ -208,6 +240,155 @@ namespace Virtuart4DNavisworks
                 }
             };
             timer.Start();
+        }
+
+        private void ExecutarGravacaoAtributo()
+        {
+            var doc = Autodesk.Navisworks.Api.Application.ActiveDocument;
+            if (doc == null || doc.IsClear)
+            {
+                MessageBox.Show("Please open a Navisworks document before writing attributes.",
+                    "Virtuart4D Exporter", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var selecao = doc.CurrentSelection.SelectedItems;
+            if (selecao.Count == 0)
+            {
+                MessageBox.Show("Select at least one element in the model.",
+                    "Virtuart4D Exporter", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            var timer = new System.Windows.Forms.Timer { Interval = 50 };
+            timer.Tick += (s, e) =>
+            {
+                timer.Stop();
+                timer.Dispose();
+
+                try
+                {
+                    var setsPorItem = MapearTodosSetsPorItem(doc, selecao);
+                    var setsDetectados = CriarResumoSets(setsPorItem);
+                    var setsSalvos = AtributoService.LerSetsSalvos(
+                        selecao[0],
+                        setsDetectados.Select(setInfo => setInfo.Nome),
+                        VirtuartSchema.CategoriaPrincipal);
+
+                    string nomeSetDetectado = setsPorItem.TryGetValue(selecao[0], out var setsPrimeiroItem) &&
+                                              setsPrimeiroItem.Count > 0
+                        ? setsPrimeiroItem[0].Nome
+                        : null;
+
+                    using (var form = new WriteAttributeForm(
+                        selecao.Count,
+                        setsDetectados,
+                        nomeSetDetectado,
+                        setsSalvos))
+                    {
+                        IWin32Window owner = Autodesk.Navisworks.Api.Application.Gui.MainWindow;
+                        if (form.ShowDialog(owner) != DialogResult.OK) return;
+
+                        var colecao = new ModelItemCollection();
+                        foreach (var item in selecao)
+                            colecao.Add(item);
+
+                        var setsSelecionadosPorItem = FiltrarSetsSelecionados(setsPorItem, form.NomesSetsSelecionados);
+
+                        var resultado = form.SolicitarExclusao
+                            ? AtributoService.ExcluirAtributos(colecao, form.NomeCategoria)
+                            : AtributoService.GravarAtributos(colecao, form.Atributos, form.NomeCategoria, setsSelecionadosPorItem);
+
+                        MessageBox.Show(resultado.mensagem,
+                            form.SolicitarExclusao ? "Virtuart4D - Delete" : "Virtuart4D - Save",
+                            MessageBoxButtons.OK,
+                            resultado.erros > 0 ? MessageBoxIcon.Warning : MessageBoxIcon.Information);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"An error occurred during attribute write/delete:\n{ex.Message}",
+                        "Virtuart4D Exporter", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            };
+            timer.Start();
+        }
+
+        private Dictionary<ModelItem, List<SetAssignment>> MapearTodosSetsPorItem(
+            Document doc, IEnumerable<ModelItem> selecao)
+        {
+            var mapa = new Dictionary<ModelItem, List<SetAssignment>>();
+
+            try
+            {
+                foreach (var item in selecao)
+                    mapa[item] = new List<SetAssignment>();
+
+                foreach (var setInfo in SelectionSetCache.Collect(doc))
+                {
+                    foreach (ModelItem itemDoSet in setInfo.Itens)
+                    {
+                        if (mapa.TryGetValue(itemDoSet, out var setsDoItem))
+                            setsDoItem.Add(new SetAssignment(setInfo.NomeGravacao));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Virtuart4D] Erro ao mapear sets da selecao: {ex.Message}");
+            }
+            return mapa;
+        }
+
+        private List<WriteAttributeForm.SetResumo> CriarResumoSets(
+            Dictionary<ModelItem, List<SetAssignment>> setsPorItem)
+        {
+            var itensPorNome = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var setsDoItem in setsPorItem.Values)
+            {
+                foreach (var nome in (setsDoItem ?? new List<SetAssignment>())
+                    .Where(setInfo => !string.IsNullOrWhiteSpace(setInfo?.Nome))
+                    .Select(setInfo => setInfo.Nome.Trim())
+                    .Distinct(StringComparer.OrdinalIgnoreCase))
+                {
+                    if (itensPorNome.TryGetValue(nome, out var quantidade))
+                        itensPorNome[nome] = quantidade + 1;
+                    else
+                        itensPorNome[nome] = 1;
+                }
+            }
+
+            return itensPorNome
+                .OrderBy(kvp => kvp.Key)
+                .Select(kvp => new WriteAttributeForm.SetResumo(kvp.Key, kvp.Value))
+                .ToList();
+        }
+
+        private Dictionary<ModelItem, List<SetAssignment>> FiltrarSetsSelecionados(
+            Dictionary<ModelItem, List<SetAssignment>> setsPorItem,
+            IEnumerable<string> nomesSelecionados)
+        {
+            if (setsPorItem == null)
+                return null;
+
+            var nomes = new HashSet<string>(
+                (nomesSelecionados ?? Enumerable.Empty<string>())
+                    .Where(nome => !string.IsNullOrWhiteSpace(nome))
+                    .Select(nome => nome.Trim()),
+                StringComparer.OrdinalIgnoreCase);
+
+            var resultado = new Dictionary<ModelItem, List<SetAssignment>>();
+            foreach (var kvp in setsPorItem)
+            {
+                resultado[kvp.Key] = (kvp.Value ?? new List<SetAssignment>())
+                    .Where(setInfo => !string.IsNullOrWhiteSpace(setInfo?.Nome) && nomes.Contains(setInfo.Nome.Trim()))
+                    .GroupBy(setInfo => setInfo.Nome.Trim(), StringComparer.OrdinalIgnoreCase)
+                    .Select(g => g.First())
+                    .ToList();
+            }
+
+            return resultado;
         }
     }
 }
