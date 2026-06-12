@@ -143,7 +143,7 @@ namespace Virtuart4DNavisworks
                         setInfo.Nome,
                         setInfo.Nome,
                         null,
-                        useAutomation: false);
+                        useAutomation: true);
 
                     exportMessage = exportSuccess
                         ? $"Exported to: {outputPath}"

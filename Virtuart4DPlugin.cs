@@ -214,6 +214,7 @@ namespace Virtuart4DNavisworks
         public event EventHandler CanExecuteChanged { add { } remove { } }
 
         private static ExportSettingsForm _settingsForm;
+        private static BatchSetExportForm _batchForm;
 
         public bool CanExecute(object parameter)
         {
@@ -299,10 +300,19 @@ namespace Virtuart4DNavisworks
 
                 try
                 {
-                    IWin32Window owner = Autodesk.Navisworks.Api.Application.Gui.MainWindow;
-                    using (var form = new BatchSetExportForm(doc))
+                    if (_batchForm == null || _batchForm.IsDisposed)
                     {
-                        form.ShowDialog(owner);
+                        _batchForm = new BatchSetExportForm(doc);
+                        IWin32Window owner = Autodesk.Navisworks.Api.Application.Gui.MainWindow;
+                        _batchForm.Show(owner);
+                    }
+                    else
+                    {
+                        _batchForm.BringToFront();
+                        if (_batchForm.WindowState == FormWindowState.Minimized)
+                        {
+                            _batchForm.WindowState = FormWindowState.Normal;
+                        }
                     }
                 }
                 catch (Exception ex)
