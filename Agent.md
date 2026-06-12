@@ -66,6 +66,7 @@ Conformance > taste inside codebase. Convention harmful → surface it. Don't fo
 - **Framework:** Must target **.NET Framework 4.8** (`net48`).
 - **Targeting Pack:** Use NuGet `Microsoft.NETFramework.ReferenceAssemblies` in `.csproj` to allow cross-platform compiling using the dotnet CLI (e.g. `dotnet build`).
 - **Warning-Free Compilation:** Do **NOT** add managed assembly references to native C++ DLLs like `DatasmithFacadeCSharp.dll` in `.csproj`. Reference only the managed wrapper `DatasmithNavisworksPlugin2025.dll` to keep compilation completely warning-free (eliminating `MSB3246`).
+- **Generated Assembly Attributes:** Keep `GenerateAssemblyInfo=false` and `GenerateTargetFrameworkAttribute=false` in the `.csproj` to avoid duplicate generated assembly attributes during `dotnet build`.
 
 ### 2. External SDK Reference Paths
 - **Navisworks Manage 2025 APIs:** `C:\Program Files\Autodesk\Navisworks Manage 2025\`
@@ -75,6 +76,7 @@ Conformance > taste inside codebase. Convention harmful → surface it. Don't fo
 - We avoid slow C# COM geometry extraction (which takes ~3 minutes and has scale/rotation bugs) by silently delegating the export to Epic's official native C++ plugin record `"DatasmithNavisworksExporter.EpicGames"`.
 - We pass custom settings (`MergeMaxDepth` and `Origin`) as command-line parameter strings: `filePath`, `$"Merge={mergeMaxDepth}"`, and `$"Origin={originX},{originY},{originZ}"`.
 - Since `Application.IsAutomated` is `false` in interactive GUI mode, Epic's exporter will always prompt for the target path via its own native `SaveFileDialog`. To avoid duplicate dialogs, we removed the local `SaveFileDialog` from our settings form (`ExportSettingsForm.cs`) and let the user interact solely with the official SaveFileDialog.
+- Batch exports bypass the interactive dialog by calling `Application.Automation.ExecuteAddInPlugin("DatasmithNavisworksExporter.EpicGames", parameters)` through `DatasmithExporterService.ExportActiveDocument(..., useAutomation: true)`.
 - Once the export completes in **~1 second**, our C# code uses a smart CWD and directory fallback scan (`FindMostRecentDatasmithFile`) to locate the exported `.udatasmith` file.
 - We then run a high-speed XML post-processor (`System.Xml.XmlDocument`) that scans `<KeyValueProperty>` tags and replaces all `*` separators with a dot `.` in the `name` attribute, transforming `Item*Layer` into the custom `Item.Layer` metadata keys.
 - **Dynamic Buffered Logging & Metadata:** All log messages are cached in-memory (`_logBuffer`) during execution, and written to disk **only** once the final target file path is resolved (yielding `<ExportedFileName>_export.log`). Old log files of previous exports are left untouched, and only overwritten if the same udatasmith file is overwritten.
@@ -101,5 +103,35 @@ Conformance > taste inside codebase. Convention harmful → surface it. Don't fo
 - **COM API Compatibility:** Employs reflection inside `ComBridgeHelper` to dynamically call `ComApiBridge.ToInwOpSelection` in runtime, ensuring compatibility across Autodesk Navisworks 2025 and 2026.
 - **Ribbon Tab Integration:** Registers the `Write Attribute` button under a new ribbon panel "Attributes" in the "Virtuart4D" ribbon tab.
 
+### 7. Batch Export Sets
+- **Feature Overview:** Adds a dedicated batch workflow that iterates over selected Navisworks Selection Sets, writes the set name into every element of that set, temporarily hides everything else, and exports each set as its own fully merged `.udatasmith`.
+- **Ribbon Entry:** New `Batch Export Sets` button in the Datasmith Exporter panel.
+- **Main Form:** `BatchSetExportForm.cs` lists all detected sets, supports search, select-all/clear, output folder selection, merge depth, and origin overrides.
+- **Service:** `BatchSetExportService.cs` expands each selected set to its descendants, writes `Virtuart_Sets` with the set name, exports via automation API, and restores the original visibility/selection state afterward.
+- **Export Naming:** Output files are sanitized from the set name (`<Set>.udatasmith`) with automatic numeric suffixes when duplicates exist.
+- **Automation Mode:** `DatasmithExporterService.cs` now supports `useAutomation: true` via `Application.Automation.ExecuteAddInPlugin`, which avoids the interactive save dialog during batch exports.
+- **Build Note:** The project now compiles successfully after disabling generated assembly attributes in the `.csproj`.
+
+## Superpowers Skills — Quick Reference (GEMINI.md)
+
+Skills are defined in `GEMINI.md`. Read only the line range you need — do NOT read the entire file.
+
+| # | Skill | Lines | What it does | When to activate |
+|---|-------|-------|-------------|-----------------|
+| 1 | **using-superpowers** | [L10–L47](file:///e:/@Virtuart/Claude/Projetos/Virtuart4DNavisworks/GEMINI.md#L10-L47) | Master rule — check if any skill applies before acting | Every conversation start |
+| 2 | **brainstorming** | [L50–L106](file:///e:/@Virtuart/Claude/Projetos/Virtuart4DNavisworks/GEMINI.md#L50-L106) | Turns ideas into approved designs before coding | User asks to create/build/add a feature |
+| 3 | **test-driven-development** | [L109–L216](file:///e:/@Virtuart/Claude/Projetos/Virtuart4DNavisworks/GEMINI.md#L109-L216) | Red-Green-Refactor cycle — write test first, then code | Implementing any feature or bugfix |
+| 4 | **systematic-debugging** | [L219–L353](file:///e:/@Virtuart/Claude/Projetos/Virtuart4DNavisworks/GEMINI.md#L219-L353) | 4-phase root cause analysis before any fix attempt | Any bug, test failure, or unexpected behavior |
+| 5 | **writing-plans** | [L356–L412](file:///e:/@Virtuart/Claude/Projetos/Virtuart4DNavisworks/GEMINI.md#L356-L412) | Creates bite-sized implementation plans with TDD/YAGNI/DRY | User has a spec/requirements for multi-step work |
+| 6 | **executing-plans** | [L415–L448](file:///e:/@Virtuart/Claude/Projetos/Virtuart4DNavisworks/GEMINI.md#L415-L448) | Loads a plan → reviews → executes task by task → verifies | User says "execute the plan" or similar |
+| 7 | **subagent-driven-development** | [L451–L489](file:///e:/@Virtuart/Claude/Projetos/Virtuart4DNavisworks/GEMINI.md#L451-L489) | Dispatches sub-agent per task + spec/quality review | Plan with independent tasks in current session |
+| 8 | **requesting-code-review** | [L492–L531](file:///e:/@Virtuart/Claude/Projetos/Virtuart4DNavisworks/GEMINI.md#L492-L531) | Triggers a code review before merge | After completing a feature or before merge |
+| 9 | **receiving-code-review** | [L534–L604](file:///e:/@Virtuart/Claude/Projetos/Virtuart4DNavisworks/GEMINI.md#L534-L604) | Evaluates review feedback technically, not emotionally | When receiving code review comments |
+| 10 | **verification-before-completion** | [L607–L661](file:///e:/@Virtuart/Claude/Projetos/Virtuart4DNavisworks/GEMINI.md#L607-L661) | Must run verification command before claiming "done" | Before any completion claim |
+| 11 | **dispatching-parallel-agents** | [L664–L712](file:///e:/@Virtuart/Claude/Projetos/Virtuart4DNavisworks/GEMINI.md#L664-L712) | Splits independent problems into parallel agents | 2+ unrelated failures or tasks |
+| 12 | **finishing-a-development-branch** | [L715–L762](file:///e:/@Virtuart/Claude/Projetos/Virtuart4DNavisworks/GEMINI.md#L715-L762) | Verify → present merge/PR/keep/discard options | Implementation complete, tests pass |
+| 13 | **using-git-worktrees** | [L765–L806](file:///e:/@Virtuart/Claude/Projetos/Virtuart4DNavisworks/GEMINI.md#L765-L806) | Creates isolated workspace for feature work | Starting work that needs branch isolation |
+
+**Usage:** When a skill applies, read only its line range from GEMINI.md and follow the instructions there.
 
 

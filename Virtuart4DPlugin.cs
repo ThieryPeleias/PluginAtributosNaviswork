@@ -80,6 +80,22 @@ namespace Virtuart4DNavisworks
 
             panelSource.Items.Add(btnExport);
 
+            // Button: Batch Export Sets
+            var btnBatchExport = new RibbonButton
+            {
+                Text        = "Batch\nExport Sets",
+                Id          = "ID_BTN_BATCH_EXPORT_SETS",
+                Size        = RibbonItemSize.Large,
+                ShowText    = true,
+                ShowImage   = true,
+                Orientation = System.Windows.Controls.Orientation.Vertical,
+                LargeImage  = CriarIcone("B", System.Drawing.Color.FromArgb(0, 117, 134)),
+                Image       = CriarIcone16("B", System.Drawing.Color.FromArgb(0, 117, 134))
+            };
+            btnBatchExport.CommandHandler = new Virtuart4DCommandHandler();
+
+            panelSource.Items.Add(btnBatchExport);
+
             var panel = new RibbonPanel { Source = panelSource };
             tab.Panels.Add(panel);
 
@@ -105,6 +121,21 @@ namespace Virtuart4DNavisworks
             btnWriteAttribute.CommandHandler = new Virtuart4DCommandHandler();
 
             panelAttrSource.Items.Add(btnWriteAttribute);
+
+            var btnGroupSets = new RibbonButton
+            {
+                Text        = "Group\nSets by Attribute",
+                Id          = "ID_BTN_GROUP_SETS_BY_ATTRIBUTE",
+                Size        = RibbonItemSize.Large,
+                ShowText    = true,
+                ShowImage   = true,
+                Orientation = System.Windows.Controls.Orientation.Vertical,
+                LargeImage  = CriarIcone("G", System.Drawing.Color.FromArgb(0, 117, 134)),
+                Image       = CriarIcone16("G", System.Drawing.Color.FromArgb(0, 117, 134))
+            };
+            btnGroupSets.CommandHandler = new Virtuart4DCommandHandler();
+
+            panelAttrSource.Items.Add(btnGroupSets);
 
             var panelAttr = new RibbonPanel { Source = panelAttrSource };
             tab.Panels.Add(panelAttr);
@@ -198,9 +229,17 @@ namespace Virtuart4DNavisworks
             {
                 ExecutarExportacao();
             }
+            else if (btn.Id == "ID_BTN_BATCH_EXPORT_SETS")
+            {
+                ExecutarBatchExportSets();
+            }
             else if (btn.Id == "ID_BTN_WRITE_ATTRIBUTE")
             {
                 ExecutarGravacaoAtributo();
+            }
+            else if (btn.Id == "ID_BTN_GROUP_SETS_BY_ATTRIBUTE")
+            {
+                ExecutarGroupSetsByAttribute();
             }
         }
 
@@ -237,6 +276,39 @@ namespace Virtuart4DNavisworks
                     {
                         _settingsForm.WindowState = FormWindowState.Normal;
                     }
+                }
+            };
+            timer.Start();
+        }
+
+        private void ExecutarBatchExportSets()
+        {
+            var doc = Autodesk.Navisworks.Api.Application.ActiveDocument;
+            if (doc == null || doc.IsClear)
+            {
+                MessageBox.Show("Please open a Navisworks document before batch exporting sets.",
+                    "Virtuart4D Exporter", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var timer = new System.Windows.Forms.Timer { Interval = 50 };
+            timer.Tick += (s, e) =>
+            {
+                timer.Stop();
+                timer.Dispose();
+
+                try
+                {
+                    IWin32Window owner = Autodesk.Navisworks.Api.Application.Gui.MainWindow;
+                    using (var form = new BatchSetExportForm(doc))
+                    {
+                        form.ShowDialog(owner);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"An error occurred while opening batch export:\n{ex.Message}",
+                        "Virtuart4D Exporter", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             };
             timer.Start();
@@ -308,6 +380,39 @@ namespace Virtuart4DNavisworks
                 catch (Exception ex)
                 {
                     MessageBox.Show($"An error occurred during attribute write/delete:\n{ex.Message}",
+                        "Virtuart4D Exporter", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            };
+            timer.Start();
+        }
+
+        private void ExecutarGroupSetsByAttribute()
+        {
+            var doc = Autodesk.Navisworks.Api.Application.ActiveDocument;
+            if (doc == null || doc.IsClear)
+            {
+                MessageBox.Show("Please open a Navisworks document before grouping sets.",
+                    "Virtuart4D Exporter", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var timer = new System.Windows.Forms.Timer { Interval = 50 };
+            timer.Tick += (s, e) =>
+            {
+                timer.Stop();
+                timer.Dispose();
+
+                try
+                {
+                    IWin32Window owner = Autodesk.Navisworks.Api.Application.Gui.MainWindow;
+                    using (var form = new AttributeSetBuilderForm(doc))
+                    {
+                        form.ShowDialog(owner);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"An error occurred while opening attribute set grouping:\n{ex.Message}",
                         "Virtuart4D Exporter", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             };

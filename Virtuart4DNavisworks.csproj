@@ -11,6 +11,8 @@
     <LangVersion>latest</LangVersion>
     <UseWindowsForms>true</UseWindowsForms>
     <NoWarn>CS8600;CS8602;CS8603</NoWarn>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
 
     <!-- Saída direto para o .bundle em ApplicationPlugins (v22 para NW 2025) -->
     <OutputPath>$(AppData)\Autodesk\ApplicationPlugins\Virtuart4DNavisworks.bundle\Contents\v22\</OutputPath>

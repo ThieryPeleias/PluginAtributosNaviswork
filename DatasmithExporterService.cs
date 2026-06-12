@@ -55,7 +55,8 @@ namespace Virtuart4DNavisworks
             string originSelectionType = "Default / Manual",
             string selectedElementName = "None",
             string selectedElementId = "None",
-            System.Collections.Generic.List<string[]> groupByProperties = null)
+            System.Collections.Generic.List<string[]> groupByProperties = null,
+            bool useAutomation = false)
         {
             if (doc == null) return false;
 
@@ -125,15 +126,8 @@ namespace Virtuart4DNavisworks
                     pluginRecord.LoadPlugin();
                 }
 
-                var plugin = pluginRecord.LoadedPlugin as Autodesk.Navisworks.Api.Plugins.AddInPlugin;
-                if (plugin == null)
-                {
-                    Log("[ERROR] Failed to cast loaded plugin as AddInPlugin.");
-                    return false;
-                }
+                Log($"Export Mode: {(useAutomation ? "Automation API (non-interactive)" : "Interactive Plugin")}");
 
-                Log("Executing Epic Games Datasmith Exporter silently/prompting if GUI...");
-                
                 bool useCustomGrouping = groupByProperties != null && groupByProperties.Count > 0 && mergeMaxDepth > 0;
                 int exporterMergeDepth = useCustomGrouping ? 0 : mergeMaxDepth;
 
@@ -151,8 +145,27 @@ namespace Virtuart4DNavisworks
                     $"Origin={originStr}"
                 };
 
-                // Epic plugin execution blocks synchronously until finished
-                int exitCode = plugin.Execute(parameters);
+                int exitCode;
+                if (useAutomation)
+                {
+                    Log("Executing Epic Games Datasmith Exporter via Application.Automation.ExecuteAddInPlugin...");
+                    Autodesk.Navisworks.Api.Application.Automation.ExecuteAddInPlugin(
+                        "DatasmithNavisworksExporter.EpicGames",
+                        parameters);
+                    exitCode = 0;
+                }
+                else
+                {
+                    var plugin = pluginRecord.LoadedPlugin as Autodesk.Navisworks.Api.Plugins.AddInPlugin;
+                    if (plugin == null)
+                    {
+                        Log("[ERROR] Failed to cast loaded plugin as AddInPlugin.");
+                        return false;
+                    }
+
+                    Log("Executing Epic Games Datasmith Exporter silently/prompting if GUI...");
+                    exitCode = plugin.Execute(parameters);
+                }
                 Log($"Epic Games Exporter finished. Exit Code: {exitCode}");
 
                 // Locate the actually exported file path
@@ -231,7 +244,142 @@ namespace Virtuart4DNavisworks
                         Log($"Successfully updated {modifiedKeys} metadata keys to 'Category.Name' format.");
                     }
 
-                    // 2. Perform property-based actor grouping if enabled
+                    // 2. Inject custom attributes from Navisworks into XML metadata
+                    try
+                    {
+                        var itemMap = new System.Collections.Generic.Dictionary<string, ModelItem>(StringComparer.OrdinalIgnoreCase);
+                        foreach (var model in doc.Models)
+                        {
+                            if (model.RootItem != null)
+                            {
+                                MapModelItemsByGuid(model.RootItem, itemMap);
+                            }
+                        }
+                        Log($"Mapped {itemMap.Count} Navisworks ModelItems by InstanceGuid for metadata injection.");
+
+                        var targetCategories = new System.Collections.Generic.HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                        {
+                            VirtuartSchema.CategoriaPrincipal,
+                            "Virtuart_Sets",
+                            "Custom"
+                        };
+
+                        if (groupByProperties != null)
+                        {
+                            foreach (var propPair in groupByProperties)
+                            {
+                                targetCategories.Add(propPair[0]);
+                            }
+                        }
+
+                        // Get all Actor and ActorMesh nodes in the XML to find their corresponding Navisworks items
+                        var xmlActors = xmlDoc.GetElementsByTagName("Actor");
+                        var xmlActorMeshes = xmlDoc.GetElementsByTagName("ActorMesh");
+                        var allActorsList = new System.Collections.Generic.List<XmlElement>();
+                        foreach (XmlNode n in xmlActors) if (n is XmlElement el) allActorsList.Add(el);
+                        foreach (XmlNode n in xmlActorMeshes) if (n is XmlElement el) allActorsList.Add(el);
+
+                        // Build a map of reference -> MetaData XmlNode
+                        var metaDataMap = new System.Collections.Generic.Dictionary<string, XmlNode>(StringComparer.OrdinalIgnoreCase);
+                        var metaDataList = xmlDoc.GetElementsByTagName("MetaData");
+                        var metaDataNodes = new System.Collections.Generic.List<XmlNode>();
+                        foreach (XmlNode metaNode in metaDataList)
+                        {
+                            metaDataNodes.Add(metaNode);
+                        }
+                        foreach (XmlNode metaNode in metaDataNodes)
+                        {
+                            if (metaNode is XmlElement metaEl)
+                            {
+                                string reference = metaEl.GetAttribute("reference");
+                                if (!string.IsNullOrEmpty(reference))
+                                {
+                                    metaDataMap[reference] = metaNode;
+                                }
+                            }
+                        }
+
+                        int propertiesInjected = 0;
+                        foreach (var actorEl in allActorsList)
+                        {
+                            string actorName = actorEl.GetAttribute("name");
+                            if (string.IsNullOrEmpty(actorName)) continue;
+
+                            if (itemMap.TryGetValue(actorName, out ModelItem modelItem))
+                            {
+                                string metaRef = "Actor." + actorName;
+                                XmlElement metaEl = null;
+                                if (metaDataMap.TryGetValue(metaRef, out XmlNode existingMetaNode))
+                                {
+                                    metaEl = existingMetaNode as XmlElement;
+                                }
+                                else
+                                {
+                                    metaEl = xmlDoc.CreateElement("MetaData", xmlDoc.DocumentElement.NamespaceURI);
+                                    metaEl.SetAttribute("name", actorName + "_DATA");
+                                    metaEl.SetAttribute("reference", metaRef);
+                                    xmlDoc.DocumentElement.AppendChild(metaEl);
+                                    metaDataMap[metaRef] = metaEl;
+                                }
+
+                                // Collect existing keys to avoid duplicates
+                                var existingKeys = new System.Collections.Generic.HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                                foreach (XmlElement kvp in metaEl.GetElementsByTagName("KeyValueProperty"))
+                                {
+                                    string keyName = kvp.GetAttribute("name");
+                                    if (!string.IsNullOrEmpty(keyName))
+                                    {
+                                        existingKeys.Add(keyName);
+                                    }
+                                }
+
+                                // Traverse up the model item hierarchy and inject properties
+                                ModelItem currentItem = modelItem;
+                                while (currentItem != null)
+                                {
+                                    foreach (var category in currentItem.PropertyCategories)
+                                    {
+                                        string catName = category.DisplayName ?? category.Name;
+                                        if (string.IsNullOrEmpty(catName)) continue;
+
+                                        if (targetCategories.Contains(catName))
+                                        {
+                                            foreach (var prop in category.Properties)
+                                            {
+                                                string propName = prop.DisplayName ?? prop.Name;
+                                                if (string.IsNullOrEmpty(propName)) continue;
+
+                                                string propKey = $"{catName}.{propName}";
+                                                if (!existingKeys.Contains(propKey))
+                                                {
+                                                    string val = FormatVariantData(prop.Value);
+                                                    if (val != null)
+                                                    {
+                                                        XmlElement newKvp = xmlDoc.CreateElement("KeyValueProperty", xmlDoc.DocumentElement.NamespaceURI);
+                                                        newKvp.SetAttribute("name", propKey);
+                                                        newKvp.SetAttribute("type", "String");
+                                                        newKvp.SetAttribute("val", val);
+                                                        metaEl.AppendChild(newKvp);
+                                                        existingKeys.Add(propKey);
+                                                        propertiesInjected++;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    currentItem = currentItem.Parent;
+                                }
+                            }
+                        }
+
+                        Log($"Successfully injected {propertiesInjected} custom properties from Navisworks into .udatasmith XML.");
+                    }
+                    catch (Exception injectEx)
+                    {
+                        Log($"[WARNING] Failed to inject custom properties from Navisworks: {injectEx.Message}");
+                    }
+
+                    // 3. Perform property-based actor grouping if enabled
                     if (useCustomGrouping)
                     {
                         var propKeysLogged = new System.Collections.Generic.List<string>();
@@ -271,85 +419,122 @@ namespace Virtuart4DNavisworks
                             }
                         }
 
-                        // Find all nodes at depth mergeMaxDepth in the XML hierarchy
-                        var nodesAtDepth = new System.Collections.Generic.List<XmlNode>();
-                        var rootElements = xmlDoc.DocumentElement.ChildNodes;
-                        foreach (XmlNode node in rootElements)
+                        // Map reference -> MetaData XmlNode for O(1) removals
+                        var metaDataMap = new System.Collections.Generic.Dictionary<string, XmlNode>(StringComparer.OrdinalIgnoreCase);
+                        foreach (XmlNode metaNode in metaDataNodes)
                         {
-                            if (node.Name == "Actor" || node.Name == "ActorMesh")
+                            if (metaNode is XmlElement metaEl)
                             {
-                                FindNodesAtDepth(node, 1, mergeMaxDepth, nodesAtDepth);
+                                string reference = metaEl.GetAttribute("reference");
+                                if (!string.IsNullOrEmpty(reference))
+                                {
+                                    metaDataMap[reference] = metaNode;
+                                }
                             }
                         }
 
-                        Log($"Found {nodesAtDepth.Count} tree node(s) at Merge Depth {mergeMaxDepth} to process.");
+                        // Find all ActorMesh nodes in the XML hierarchy
+                        var allActorMeshes = xmlDoc.GetElementsByTagName("ActorMesh");
+                        var actorMeshList = new System.Collections.Generic.List<XmlNode>();
+                        foreach (XmlNode meshNode in allActorMeshes)
+                        {
+                            actorMeshList.Add(meshNode);
+                        }
+
+                        Log($"Found {actorMeshList.Count} total ActorMesh node(s) to process.");
+
+                        // A. Pre-calculate the anchor and group properties for all ActorMesh nodes
+                        var meshInfos = new System.Collections.Generic.List<MeshGroupInfo>();
+                        foreach (XmlNode meshNode in actorMeshList)
+                        {
+                            XmlNode anchor = FindAnchor(meshNode, mergeMaxDepth);
+                            if (anchor == null) continue;
+
+                            var groupProps = new System.Collections.Generic.Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                            bool hasAnyValue = false;
+                            var values = new System.Collections.Generic.List<string>();
+
+                            foreach (var propPair in groupByProperties)
+                            {
+                                string cat = propPair[0];
+                                string propName = propPair[1];
+                                string val = GetNodePropertyValue(meshNode, cat, propName, actorMetadata);
+                                groupProps[$"{cat}.{propName}"] = val;
+                                values.Add(val);
+                                if (!string.IsNullOrEmpty(val))
+                                {
+                                    hasAnyValue = true;
+                                }
+                            }
+
+                            string groupKey = hasAnyValue ? string.Join("_", values) : null;
+
+                            meshInfos.Add(new MeshGroupInfo
+                            {
+                                MeshNode = meshNode,
+                                Anchor = anchor,
+                                GroupKey = groupKey,
+                                HasAnyValue = hasAnyValue,
+                                GroupProps = groupProps
+                            });
+                        }
+
+                        // B. Group the mesh infos by their anchor
+                        var anchorGroups = new System.Collections.Generic.Dictionary<XmlNode, System.Collections.Generic.List<MeshGroupInfo>>();
+                        foreach (var info in meshInfos)
+                        {
+                            if (!anchorGroups.TryGetValue(info.Anchor, out var list))
+                            {
+                                list = new System.Collections.Generic.List<MeshGroupInfo>();
+                                anchorGroups[info.Anchor] = list;
+                            }
+                            list.Add(info);
+                        }
+
+                        Log($"Found {anchorGroups.Count} unique merge anchor(s) to process.");
 
                         int groupsCreated = 0;
                         int actorsMoved = 0;
 
-                        foreach (XmlNode parentNode in nodesAtDepth)
+                        // C. Process each anchor group
+                        foreach (var pair in anchorGroups)
                         {
-                            // Collect all descendant ActorMesh elements (leaves with geometry)
-                            var descendantActorMeshes = new System.Collections.Generic.List<XmlNode>();
-                            CollectActorMeshDescendants(parentNode, descendantActorMeshes);
+                            XmlNode anchorNode = pair.Key;
+                            System.Collections.Generic.List<MeshGroupInfo> infos = pair.Value;
 
-                            if (descendantActorMeshes.Count == 0) continue;
+                            var keyToInfos = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<MeshGroupInfo>>(StringComparer.OrdinalIgnoreCase);
+                            var normalInfos = new System.Collections.Generic.List<MeshGroupInfo>();
 
-                            // Group descendant ActorMesh nodes by their combined property key values
-                            var groups = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<XmlNode>>(StringComparer.OrdinalIgnoreCase);
-                            var groupPropertiesMap = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
-
-                            foreach (XmlNode meshNode in descendantActorMeshes)
+                            foreach (var info in infos)
                             {
-                                string actorName = meshNode.Attributes["name"]?.Value;
-                                if (string.IsNullOrEmpty(actorName)) continue;
-
-                                // Retrieve properties for this meshNode by searching up the tree from it
-                                var groupProps = new System.Collections.Generic.Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-                                bool hasAnyValue = false;
-                                var values = new System.Collections.Generic.List<string>();
-
-                                foreach (var propPair in groupByProperties)
+                                if (info.HasAnyValue)
                                 {
-                                    string cat = propPair[0];
-                                    string propName = propPair[1];
-                                    string val = GetNodePropertyValue(meshNode, cat, propName, actorMetadata);
-                                    groupProps[$"{cat}.{propName}"] = val;
-                                    values.Add(val);
-                                    if (!string.IsNullOrEmpty(val))
+                                    if (!keyToInfos.TryGetValue(info.GroupKey, out var list))
                                     {
-                                        hasAnyValue = true;
+                                        list = new System.Collections.Generic.List<MeshGroupInfo>();
+                                        keyToInfos[info.GroupKey] = list;
                                     }
+                                    list.Add(info);
                                 }
-
-                                if (!hasAnyValue)
+                                else
                                 {
-                                    // Keep separate, do not group
-                                    continue;
+                                    normalInfos.Add(info);
                                 }
-
-                                string key = string.Join("_", values);
-
-                                if (!groups.TryGetValue(key, out var list))
-                                {
-                                    list = new System.Collections.Generic.List<XmlNode>();
-                                    groups[key] = list;
-                                    groupPropertiesMap[key] = groupProps;
-                                }
-                                list.Add(meshNode);
                             }
 
-                            // Create new group actor for each unique property value combination as sibling of parentNode
-                            foreach (var kvp in groups)
+                            // I. Process smart merged groups
+                            foreach (var kvp in keyToInfos)
                             {
                                 string groupKey = kvp.Key;
-                                var groupNodes = kvp.Value;
-                                var groupProps = groupPropertiesMap[groupKey];
+                                var groupInfos = kvp.Value;
+                                var groupProps = groupInfos[0].GroupProps;
 
-                                string parentName = parentNode.Attributes["name"]?.Value ?? "Node";
-                                string parentLabel = parentNode.Attributes["label"]?.Value ?? parentName;
+                                string parentName = (anchorNode is XmlElement anchorEl) ? anchorEl.GetAttribute("name") : "Node";
+                                string parentLabel = (anchorNode is XmlElement anchorEl2) ? anchorEl2.GetAttribute("label") : parentName;
+                                if (string.IsNullOrEmpty(parentName)) parentName = "Node";
+                                if (string.IsNullOrEmpty(parentLabel)) parentLabel = parentName;
                                 string groupActorName = "Group_" + parentName + "_" + CleanXmlAttribute(groupKey);
-                                string groupActorLabel = parentLabel + "_" + CleanXmlAttribute(groupKey);
+                                string groupActorLabel = parentLabel + "_" + groupKey;
 
                                 XmlElement newActor = xmlDoc.CreateElement("Actor", xmlDoc.DocumentElement.NamespaceURI);
                                 newActor.SetAttribute("name", groupActorName);
@@ -368,22 +553,23 @@ namespace Virtuart4DNavisworks
                                 transform.SetAttribute("qw", "1");
                                 newActor.AppendChild(transform);
 
-                                XmlElement childrenElement = xmlDoc.CreateElement("Children", xmlDoc.DocumentElement.NamespaceURI);
+                                XmlElement childrenElement = xmlDoc.CreateElement("children", xmlDoc.DocumentElement.NamespaceURI);
+                                childrenElement.SetAttribute("visible", "true");
                                 newActor.AppendChild(childrenElement);
 
-                                // Move ActorMesh elements under the new group actor
-                                foreach (XmlNode node in groupNodes)
+                                // Move the ActorMesh nodes under the new group actor
+                                foreach (var info in groupInfos)
                                 {
-                                    if (node.ParentNode != null)
+                                    if (info.MeshNode.ParentNode != null)
                                     {
-                                        node.ParentNode.RemoveChild(node);
+                                        info.MeshNode.ParentNode.RemoveChild(info.MeshNode);
                                     }
-                                    childrenElement.AppendChild(node);
+                                    childrenElement.AppendChild(info.MeshNode);
                                     actorsMoved++;
                                 }
 
-                                // Attach the new group actor as a sibling of parentNode
-                                XmlNode parentContainer = parentNode.ParentNode;
+                                // Attach the new group actor as a sibling of anchorNode
+                                XmlNode parentContainer = anchorNode.ParentNode;
                                 if (parentContainer != null)
                                 {
                                     parentContainer.AppendChild(newActor);
@@ -393,7 +579,7 @@ namespace Virtuart4DNavisworks
                                 // Create MetaData block for the group actor at the root level
                                 XmlElement newMeta = xmlDoc.CreateElement("MetaData", xmlDoc.DocumentElement.NamespaceURI);
                                 newMeta.SetAttribute("name", "Meta_" + groupActorName);
-                                newMeta.SetAttribute("reference", groupActorName);
+                                newMeta.SetAttribute("reference", "Actor." + groupActorName);
 
                                 foreach (var propKvp in groupProps)
                                 {
@@ -405,26 +591,46 @@ namespace Virtuart4DNavisworks
                                 }
 
                                 xmlDoc.DocumentElement.AppendChild(newMeta);
+                                metaDataMap["Actor." + groupActorName] = newMeta;
                             }
 
-                            // Clean up empty folders/actors that are now children of parentNode
-                            RemoveEmptyActors(parentNode);
-
-                            // Check if parentNode itself is now empty and can be removed
-                            bool hasActiveChildren = false;
-                            foreach (XmlNode child in parentNode.ChildNodes)
+                            // II. Process normal merge meshes (those without the property)
+                            if (normalInfos.Count > 0)
                             {
-                                if (child.Name == "Children" && child.HasChildNodes)
+                                // Locate or create the Children element of the anchor node
+                                XmlNode anchorChildren = null;
+                                foreach (XmlNode child in anchorNode.ChildNodes)
                                 {
-                                    hasActiveChildren = true;
-                                    break;
+                                    if (child.Name.Equals("children", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        anchorChildren = child;
+                                        break;
+                                    }
+                                }
+                                if (anchorChildren == null)
+                                {
+                                    XmlElement newChildren = xmlDoc.CreateElement("children", xmlDoc.DocumentElement.NamespaceURI);
+                                    newChildren.SetAttribute("visible", "true");
+                                    anchorChildren = newChildren;
+                                    anchorNode.AppendChild(anchorChildren);
+                                }
+
+                                // Move all normal meshes directly under the anchor's Children element
+                                foreach (var info in normalInfos)
+                                {
+                                    if (info.MeshNode.ParentNode != null)
+                                    {
+                                        info.MeshNode.ParentNode.RemoveChild(info.MeshNode);
+                                    }
+                                    anchorChildren.AppendChild(info.MeshNode);
+                                    actorsMoved++;
                                 }
                             }
-                            if (!hasActiveChildren && parentNode.ParentNode != null)
-                            {
-                                parentNode.ParentNode.RemoveChild(parentNode);
-                            }
                         }
+
+                        // 4. Clean up all empty folders recursively across the whole document
+                        Log("Running post-processing hierarchy cleanup...");
+                        PostProcessCleanup(xmlDoc, metaDataMap);
 
                         Log($"Restructuring complete. Created {groupsCreated} group actor(s) and regrouped {actorsMoved} item(s) by properties.");
                     }
@@ -534,7 +740,7 @@ namespace Virtuart4DNavisworks
             XmlNode childrenNode = null;
             foreach (XmlNode child in node.ChildNodes)
             {
-                if (child.Name == "Children")
+                if (child.Name.Equals("children", StringComparison.OrdinalIgnoreCase))
                 {
                     childrenNode = child;
                     break;
@@ -563,7 +769,7 @@ namespace Virtuart4DNavisworks
             XmlNode childrenNode = null;
             foreach (XmlNode child in node.ChildNodes)
             {
-                if (child.Name == "Children")
+                if (child.Name.Equals("children", StringComparison.OrdinalIgnoreCase))
                 {
                     childrenNode = child;
                     break;
@@ -579,54 +785,13 @@ namespace Virtuart4DNavisworks
             }
         }
 
-        private static string GetGroupKey(
-            XmlNode meshNode, 
-            System.Collections.Generic.List<string[]> groupByProperties, 
-            System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<string, string>> actorMetadata, 
-            out System.Collections.Generic.Dictionary<string, string> groupProps)
-        {
-            groupProps = new System.Collections.Generic.Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            var values = new System.Collections.Generic.List<string>();
-            
-            foreach (var propPair in groupByProperties)
-            {
-                string cat = propPair[0];
-                string propName = propPair[1];
-                string key = $"{cat}.{propName}";
-                string val = "";
-
-                // Walk up the XML tree from the geometry leaf node (ActorMesh) to find the first ancestor that has this property
-                XmlNode current = meshNode;
-                while (current != null)
-                {
-                    string currentName = current.Attributes["name"]?.Value;
-                    if (!string.IsNullOrEmpty(currentName))
-                    {
-                        if (actorMetadata.TryGetValue(currentName, out var props))
-                        {
-                            if (props.TryGetValue(key, out var v) && !string.IsNullOrWhiteSpace(v))
-                            {
-                                val = v.Trim();
-                                break; // Found inherited value!
-                            }
-                        }
-                    }
-                    current = current.ParentNode;
-                }
-
-                groupProps[key] = val;
-                values.Add(val);
-            }
-
-            return string.Join(" | ", values);
-        }
 
         private static void RemoveEmptyActors(XmlNode node)
         {
             XmlNode childrenNode = null;
             foreach (XmlNode child in node.ChildNodes)
             {
-                if (child.Name == "Children")
+                if (child.Name.Equals("children", StringComparison.OrdinalIgnoreCase))
                 {
                     childrenNode = child;
                     break;
@@ -642,12 +807,12 @@ namespace Virtuart4DNavisworks
                     {
                         RemoveEmptyActors(child);
 
-                        // An Actor/ActorMesh is empty if it has no geometry (it is "Actor") AND has no Children with items
+                        // An Actor/ActorMesh is empty if it has no geometry (it is "Actor") AND has no children with items
                         bool isGeo = child.Name == "ActorMesh";
                         bool hasSubChildren = false;
                         foreach (XmlNode sub in child.ChildNodes)
                         {
-                            if (sub.Name == "Children" && sub.HasChildNodes)
+                            if (sub.Name.Equals("children", StringComparison.OrdinalIgnoreCase) && sub.HasChildNodes)
                             {
                                 hasSubChildren = true;
                                 break;
@@ -683,98 +848,23 @@ namespace Virtuart4DNavisworks
             XmlNode current = startNode;
             while (current != null)
             {
-                string name = current.Attributes["name"]?.Value;
-                if (!string.IsNullOrEmpty(name))
+                if (current is XmlElement element)
                 {
-                    if (actorMetadata.TryGetValue(name, out var props))
+                    string name = element.GetAttribute("name");
+                    if (!string.IsNullOrEmpty(name))
                     {
-                        if (props.TryGetValue(key, out var val) && !string.IsNullOrWhiteSpace(val))
+                        if (actorMetadata.TryGetValue("Actor." + name, out var props))
                         {
-                            return val.Trim();
+                            if (props.TryGetValue(key, out var val) && !string.IsNullOrWhiteSpace(val))
+                            {
+                                return val.Trim();
+                            }
                         }
                     }
                 }
                 current = current.ParentNode;
             }
             return "";
-        }
-
-        private static XmlNode FindOrCreateFolder(
-            XmlDocument xmlDoc, 
-            XmlNode parentNode, 
-            string propName, 
-            string propVal, 
-            string category, 
-            ref int groupsCreated)
-        {
-            // Find the Children node of parentNode
-            XmlNode childrenNode = null;
-            foreach (XmlNode child in parentNode.ChildNodes)
-            {
-                if (child.Name == "Children")
-                {
-                    childrenNode = child;
-                    break;
-                }
-            }
-
-            if (childrenNode == null)
-            {
-                childrenNode = xmlDoc.CreateElement("Children", xmlDoc.DocumentElement.NamespaceURI);
-                parentNode.AppendChild(childrenNode);
-            }
-
-            string parentName = parentNode.Attributes["name"]?.Value ?? "Node";
-            string folderName = "Group_" + parentName + "_" + CleanXmlAttribute(propName) + "_" + CleanXmlAttribute(propVal);
-            string folderLabel = propName + " - " + propVal;
-
-            // Check if folder already exists under childrenNode
-            foreach (XmlNode child in childrenNode.ChildNodes)
-            {
-                if (child.Name == "Actor" && child.Attributes["name"]?.Value == folderName)
-                {
-                    return child;
-                }
-            }
-
-            // Create new folder Actor
-            XmlElement newActor = xmlDoc.CreateElement("Actor", xmlDoc.DocumentElement.NamespaceURI);
-            newActor.SetAttribute("name", folderName);
-            newActor.SetAttribute("label", folderLabel);
-
-            XmlElement transform = xmlDoc.CreateElement("Transform", xmlDoc.DocumentElement.NamespaceURI);
-            transform.SetAttribute("tx", "0");
-            transform.SetAttribute("ty", "0");
-            transform.SetAttribute("tz", "0");
-            transform.SetAttribute("sx", "1");
-            transform.SetAttribute("sy", "1");
-            transform.SetAttribute("sz", "1");
-            transform.SetAttribute("qx", "0");
-            transform.SetAttribute("qy", "0");
-            transform.SetAttribute("qz", "0");
-            transform.SetAttribute("qw", "1");
-            newActor.AppendChild(transform);
-
-            XmlElement actorChildren = xmlDoc.CreateElement("Children", xmlDoc.DocumentElement.NamespaceURI);
-            newActor.AppendChild(actorChildren);
-
-            childrenNode.AppendChild(newActor);
-
-            // Create MetaData block for the group folder at the root level
-            XmlElement newMeta = xmlDoc.CreateElement("MetaData", xmlDoc.DocumentElement.NamespaceURI);
-            newMeta.SetAttribute("name", "Meta_" + folderName);
-            newMeta.SetAttribute("reference", folderName);
-
-            XmlElement newKvp = xmlDoc.CreateElement("KeyValueProperty", xmlDoc.DocumentElement.NamespaceURI);
-            newKvp.SetAttribute("name", category + "." + propName);
-            newKvp.SetAttribute("type", "String");
-            newKvp.SetAttribute("val", propVal);
-            newMeta.AppendChild(newKvp);
-
-            xmlDoc.DocumentElement.AppendChild(newMeta);
-
-            groupsCreated++;
-            return newActor;
         }
 
         private static string CleanXmlAttribute(string value)
@@ -787,6 +877,181 @@ namespace Virtuart4DNavisworks
                 else sb.Append("_");
             }
             return sb.ToString();
+        }
+
+        private class MeshGroupInfo
+        {
+            public XmlNode MeshNode { get; set; }
+            public XmlNode Anchor { get; set; }
+            public string GroupKey { get; set; }
+            public bool HasAnyValue { get; set; }
+            public System.Collections.Generic.Dictionary<string, string> GroupProps { get; set; }
+        }
+
+        private static XmlNode FindAnchor(XmlNode meshNode, int mergeMaxDepth)
+        {
+            var ancestors = new System.Collections.Generic.List<XmlNode>();
+            XmlNode current = meshNode.ParentNode;
+            while (current != null && current != meshNode.OwnerDocument.DocumentElement)
+            {
+                if (current.Name == "Actor")
+                {
+                    ancestors.Add(current);
+                }
+                current = current.ParentNode;
+            }
+            
+            ancestors.Reverse();
+            
+            if (ancestors.Count == 0)
+            {
+                return null;
+            }
+            
+            if (ancestors.Count >= mergeMaxDepth)
+            {
+                return ancestors[mergeMaxDepth - 1];
+            }
+            else
+            {
+                return ancestors[ancestors.Count - 1];
+            }
+        }
+
+        private static void CleanAllEmptyActors(XmlNode parentNode, System.Collections.Generic.Dictionary<string, XmlNode> metaDataMap)
+        {
+            XmlNode childrenNode = null;
+            foreach (XmlNode child in parentNode.ChildNodes)
+            {
+                if (child.Name.Equals("children", StringComparison.OrdinalIgnoreCase))
+                {
+                    childrenNode = child;
+                    break;
+                }
+            }
+
+            if (childrenNode != null)
+            {
+                var toRemove = new System.Collections.Generic.List<XmlNode>();
+                foreach (XmlNode child in childrenNode.ChildNodes)
+                {
+                    if (child.Name == "Actor")
+                    {
+                        CleanAllEmptyActors(child, metaDataMap);
+
+                        bool hasActiveChildren = false;
+                        foreach (XmlNode sub in child.ChildNodes)
+                        {
+                            if (sub.Name.Equals("children", StringComparison.OrdinalIgnoreCase) && sub.HasChildNodes)
+                            {
+                                hasActiveChildren = true;
+                                break;
+                            }
+                        }
+
+                        if (!hasActiveChildren)
+                        {
+                            toRemove.Add(child);
+                        }
+                    }
+                }
+
+                foreach (XmlNode child in toRemove)
+                {
+                    childrenNode.RemoveChild(child);
+
+                    if (child is XmlElement element)
+                    {
+                        string name = element.GetAttribute("name");
+                        if (!string.IsNullOrEmpty(name) && metaDataMap.TryGetValue("Actor." + name, out var metaNode))
+                        {
+                            if (metaNode.ParentNode != null)
+                            {
+                                metaNode.ParentNode.RemoveChild(metaNode);
+                            }
+                            metaDataMap.Remove("Actor." + name);
+                        }
+                    }
+                }
+
+                if (!childrenNode.HasChildNodes)
+                {
+                    parentNode.RemoveChild(childrenNode);
+                }
+            }
+        }
+
+        private static void PostProcessCleanup(XmlDocument xmlDoc, System.Collections.Generic.Dictionary<string, XmlNode> metaDataMap)
+        {
+            var rootElements = new System.Collections.Generic.List<XmlNode>();
+            foreach (XmlNode node in xmlDoc.DocumentElement.ChildNodes)
+            {
+                if (node.Name == "Actor")
+                {
+                    rootElements.Add(node);
+                }
+            }
+
+            foreach (XmlNode rootActor in rootElements)
+            {
+                CleanAllEmptyActors(rootActor, metaDataMap);
+
+                bool hasActiveChildren = false;
+                foreach (XmlNode sub in rootActor.ChildNodes)
+                {
+                    if (sub.Name.Equals("children", StringComparison.OrdinalIgnoreCase) && sub.HasChildNodes)
+                    {
+                        hasActiveChildren = true;
+                        break;
+                    }
+                }
+
+                if (!hasActiveChildren && rootActor.ParentNode != null)
+                {
+                    rootActor.ParentNode.RemoveChild(rootActor);
+
+                    if (rootActor is XmlElement element)
+                    {
+                        string name = element.GetAttribute("name");
+                        if (!string.IsNullOrEmpty(name) && metaDataMap.TryGetValue("Actor." + name, out var metaNode))
+                        {
+                            if (metaNode.ParentNode != null)
+                            {
+                                metaNode.ParentNode.RemoveChild(metaNode);
+                            }
+                            metaDataMap.Remove("Actor." + name);
+                        }
+                    }
+                }
+            }
+        }
+
+        private static void MapModelItemsByGuid(ModelItem item, System.Collections.Generic.Dictionary<string, ModelItem> map)
+        {
+            if (item.InstanceGuid != Guid.Empty)
+            {
+                string key = item.InstanceGuid.ToString("N").ToLower();
+                map[key] = item;
+            }
+
+            foreach (var child in item.Children)
+            {
+                MapModelItemsByGuid(child, map);
+            }
+        }
+
+        private static string FormatVariantData(VariantData valor)
+        {
+            if (valor == null) return null;
+            switch (valor.DataType)
+            {
+                case VariantDataType.Double:           return valor.ToDouble().ToString("G", System.Globalization.CultureInfo.InvariantCulture);
+                case VariantDataType.Int32:            return valor.ToInt32().ToString(System.Globalization.CultureInfo.InvariantCulture);
+                case VariantDataType.Boolean:          return valor.ToBoolean() ? "True" : "False";
+                case VariantDataType.DisplayString:    return valor.ToDisplayString();
+                case VariantDataType.IdentifierString: return valor.ToIdentifierString();
+                default:                               return valor.ToString();
+            }
         }
     }
 }
