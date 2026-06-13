@@ -64,128 +64,138 @@ namespace Virtuart4DNavisworks
                 .Where(item => item.IsHidden)
                 .ToList();
 
-            int index = 0;
-            foreach (var setInfo in selectedSets)
+            var allItems = doc.Models.RootItemDescendantsAndSelf.ToList();
+            var allItemsCollection = ToModelItemCollection(allItems);
+
+            try
             {
-                if (checkCancel != null && checkCancel())
+                int index = 0;
+                foreach (var setInfo in selectedSets)
                 {
-                    break;
-                }
-
-                progress?.Invoke(index, $"Exporting set ({index + 1}/{selectedSets.Count}): {setInfo.Nome}");
-
-                var exportItems = ExpandItems(setInfo.Itens);
-                if (exportItems.Count == 0)
-                {
-                    results.Add(new BatchSetExportResult
+                    if (checkCancel != null && checkCancel())
                     {
-                        SetName = setInfo.Nome,
-                        ElementCount = 0,
-                        OutputPath = "",
-                        Success = false,
-                        Message = "Set is empty."
-                    });
-                    index++;
-                    continue;
-                }
-
-                var outputPath = BuildOutputPath(outputFolder, setInfo.Nome);
-
-                var attributeResult = AtributoService.GravarAtributos(
-                    ToModelItemCollection(exportItems),
-                    new List<AtributoCustom>
-                    {
-                        new AtributoCustom(VirtuartSchema.CategoriaPrincipal, VirtuartSchema.PropriedadeSets, setInfo.Nome)
-                    },
-                    VirtuartSchema.CategoriaPrincipal);
-
-                var allItems = doc.Models.RootItemDescendantsAndSelf.ToList();
-                var exportSuccess = false;
-                string exportMessage = "";
-
-                try
-                {
-                    var exportSet = new HashSet<ModelItem>(exportItems);
-                    var ancestorSet = new HashSet<ModelItem>();
-
-                    foreach (var item in exportItems)
-                    {
-                        var current = item.Parent;
-                        while (current != null)
-                        {
-                            ancestorSet.Add(current);
-                            current = current.Parent;
-                        }
+                        break;
                     }
 
-                    var itemsToHide = allItems
-                        .Where(item => !exportSet.Contains(item) && !ancestorSet.Contains(item))
-                        .ToList();
+                    progress?.Invoke(index, $"Exporting set ({index + 1}/{selectedSets.Count}): {setInfo.Nome}");
 
-                    var itemsToHideCollection = ToModelItemCollection(itemsToHide);
-                    var exportItemsCollection = ToModelItemCollection(exportItems);
-                    var selectionItems = new ModelItemCollection();
-                    selectionItems.AddRange(exportItems);
+                    var exportItems = ExpandItems(setInfo.Itens);
+                    if (exportItems.Count == 0)
+                    {
+                        results.Add(new BatchSetExportResult
+                        {
+                            SetName = setInfo.Nome,
+                            ElementCount = 0,
+                            OutputPath = "",
+                            Success = false,
+                            Message = "Set is empty."
+                        });
+                        index++;
+                        continue;
+                    }
 
-                    doc.Models.SetHidden(itemsToHideCollection, true);
-                    doc.Models.SetHidden(ToModelItemCollection(ancestorSet), false);
-                    doc.Models.SetHidden(exportItemsCollection, false);
-                    doc.CurrentSelection.CopyFrom(selectionItems);
+                    var outputPath = BuildOutputPath(outputFolder, setInfo.Nome);
 
-                    exportSuccess = DatasmithExporterService.ExportActiveDocument(
-                        doc,
-                        outputPath,
-                        mergeDepth,
-                        originX,
-                        originY,
-                        originZ,
-                        "Batch Set Export",
-                        setInfo.Nome,
-                        setInfo.Nome,
-                        null,
-                        useAutomation: true);
+                    var attributeResult = AtributoService.GravarAtributos(
+                        ToModelItemCollection(exportItems),
+                        new List<AtributoCustom>
+                        {
+                            new AtributoCustom(VirtuartSchema.CategoriaPrincipal, VirtuartSchema.PropriedadeSets, setInfo.Nome)
+                        },
+                        VirtuartSchema.CategoriaPrincipal);
 
-                    exportMessage = exportSuccess
-                        ? $"Exported to: {outputPath}"
-                        : "Export failed. Check the export log for details.";
-                }
-                catch (Exception ex)
-                {
-                    exportMessage = ex.Message;
-                }
-                finally
-                {
+                    var exportSuccess = false;
+                    string exportMessage = "";
+
                     try
                     {
-                        var allItemsCollection = ToModelItemCollection(allItems);
-                        var originalHiddenCollection = ToModelItemCollection(originalHidden);
-                        doc.Models.SetHidden(allItemsCollection, false);
-                        doc.Models.SetHidden(originalHiddenCollection, true);
-                        doc.CurrentSelection.CopyFrom(originalSelection);
+                        var exportSet = new HashSet<ModelItem>(exportItems);
+                        var ancestorSet = new HashSet<ModelItem>();
+
+                        foreach (var item in exportItems)
+                        {
+                            var current = item.Parent;
+                            while (current != null)
+                            {
+                                ancestorSet.Add(current);
+                                current = current.Parent;
+                            }
+                        }
+
+                        var itemsToHide = allItems
+                            .Where(item => !exportSet.Contains(item) && !ancestorSet.Contains(item))
+                            .ToList();
+
+                        var itemsToHideCollection = ToModelItemCollection(itemsToHide);
+                        var exportItemsCollection = ToModelItemCollection(exportItems);
+                        var selectionItems = new ModelItemCollection();
+                        selectionItems.AddRange(exportItems);
+
+                        // Isolate this set's elements
+                        doc.Models.SetHidden(itemsToHideCollection, true);
+                        doc.Models.SetHidden(ToModelItemCollection(ancestorSet), false);
+                        doc.Models.SetHidden(exportItemsCollection, false);
+                        doc.CurrentSelection.CopyFrom(selectionItems);
+
+                        exportSuccess = DatasmithExporterService.ExportActiveDocument(
+                            doc,
+                            outputPath,
+                            mergeDepth,
+                            originX,
+                            originY,
+                            originZ,
+                            "Batch Set Export",
+                            setInfo.Nome,
+                            setInfo.Nome,
+                            null,
+                            useAutomation: true);
+
+                        exportMessage = exportSuccess
+                            ? $"Exported to: {outputPath}"
+                            : "Export failed. Check the export log for details.";
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // Ignore restore failures so the batch can continue.
+                        exportMessage = ex.Message;
                     }
+
+                    var result = new BatchSetExportResult
+                    {
+                        SetName = setInfo.Nome,
+                        ElementCount = exportItems.Count,
+                        OutputPath = outputPath,
+                        Success = exportSuccess,
+                        Message = exportMessage,
+                        HasAttributeWarning = attributeResult.sucesso == 0 || attributeResult.erros > 0
+                    };
+
+                    if (result.HasAttributeWarning)
+                    {
+                        result.Message = $"Attribute warning: {attributeResult.mensagem} | {result.Message}";
+                    }
+
+                    results.Add(result);
+                    index++;
+
+                    // Yield execution and sleep briefly to allow the exporter to release files
+                    System.Windows.Forms.Application.DoEvents();
+                    System.Threading.Thread.Sleep(500);
                 }
-
-                var result = new BatchSetExportResult
+            }
+            finally
+            {
+                // Restore original visibility and selection state ONCE at the end of the batch
+                try
                 {
-                    SetName = setInfo.Nome,
-                    ElementCount = exportItems.Count,
-                    OutputPath = outputPath,
-                    Success = exportSuccess,
-                    Message = exportMessage,
-                    HasAttributeWarning = attributeResult.sucesso == 0 || attributeResult.erros > 0
-                };
-
-                if (result.HasAttributeWarning)
-                {
-                    result.Message = $"Attribute warning: {attributeResult.mensagem} | {result.Message}";
+                    var originalHiddenCollection = ToModelItemCollection(originalHidden);
+                    doc.Models.SetHidden(allItemsCollection, false);
+                    doc.Models.SetHidden(originalHiddenCollection, true);
+                    doc.CurrentSelection.CopyFrom(originalSelection);
                 }
-
-                results.Add(result);
-                index++;
+                catch
+                {
+                    // Ignore restore failures
+                }
             }
 
             return results;
