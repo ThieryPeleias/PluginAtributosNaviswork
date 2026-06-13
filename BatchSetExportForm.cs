@@ -31,6 +31,16 @@ namespace Virtuart4DNavisworks
         private bool _exporting;
         private bool _cancelRequested;
 
+        private Queue<string> _exportQueue;
+        private List<BatchSetExportResult> _exportResults;
+        private Timer _exportTimer;
+        private int _totalToExport;
+        private int _exportedCount;
+        private Selection _originalSelection;
+        private List<ModelItem> _originalHidden;
+        private List<ModelItem> _allItems;
+        private ModelItemCollection _allItemsCollection;
+
         public BatchSetExportForm(Document doc)
         {
             _doc = doc;
@@ -385,52 +395,132 @@ namespace Virtuart4DNavisworks
             }
 
             var selectedSets = _setsSelecionados.ToList();
-            var total = selectedSets.Count;
-            var cursor = System.Windows.Forms.Cursor.Current;
-            var oldExportEnabled = _btnExport.Enabled;
-            System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.WaitCursor;
-            _btnExport.Enabled = false;
+            _totalToExport = selectedSets.Count;
+            _exportedCount = 0;
+            _exportQueue = new Queue<string>(selectedSets);
+            _exportResults = new List<BatchSetExportResult>();
 
+            // Save original visibility and selection state before batch starts
+            _originalSelection = new Selection(_doc.CurrentSelection);
+            _originalHidden = _doc.Models.RootItemDescendantsAndSelf
+                .Where(item => item.IsHidden)
+                .ToList();
+            _allItems = _doc.Models.RootItemDescendantsAndSelf.ToList();
+            _allItemsCollection = ToModelItemCollection(_allItems);
+
+            // Disable controls
+            _btnExport.Enabled = false;
             _exporting = true;
             _cancelRequested = false;
 
+            _progressBar.Minimum = 0;
+            _progressBar.Maximum = _totalToExport;
+            _progressBar.Value = 0;
+
+            // Start deferred export timer to yield execution back to Navisworks
+            _exportTimer = new Timer { Interval = 200 };
+            _exportTimer.Tick += ExportTimer_Tick;
+            _exportTimer.Start();
+        }
+
+        private void ExportTimer_Tick(object sender, EventArgs e)
+        {
+            _exportTimer.Stop(); // Prevent overlapping ticks
+
+            if (_cancelRequested)
+            {
+                FinalizarBatch(true);
+                return;
+            }
+
+            if (_exportQueue.Count == 0)
+            {
+                FinalizarBatch(false);
+                return;
+            }
+
+            string setName = _exportQueue.Dequeue();
+            _progressBar.Value = _exportedCount;
+            _lblStatus.Text = $"Exporting set ({_exportedCount + 1}/{_totalToExport}): {setName}";
+            System.Windows.Forms.Application.DoEvents();
+
             try
             {
-                _progressBar.Minimum = 0;
-                _progressBar.Maximum = Math.Max(1, total);
-                _progressBar.Value = 0;
-
-                var results = BatchSetExportService.ExportSets(
+                var result = BatchSetExportService.ExportSingleSet(
                     _doc,
-                    selectedSets,
+                    setName,
                     _outputFolder,
                     (int)_numMergeDepth.Value,
                     (double)_numOriginX.Value,
                     (double)_numOriginY.Value,
                     (double)_numOriginZ.Value,
-                    (index, message) =>
-                    {
-                        _progressBar.Value = Math.Min(_progressBar.Maximum, index);
-                        _lblStatus.Text = message;
-                        System.Windows.Forms.Application.DoEvents();
-                    },
-                    () => _cancelRequested);
+                    _allItems);
 
-                _progressBar.Value = _progressBar.Maximum;
-                _lblStatus.Text = _cancelRequested ? "Export cancelled." : "Export completed.";
-
-                ShowSummary(results, _cancelRequested);
+                _exportResults.Add(result);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Batch export failed:\n{ex.Message}", "Virtuart4D - Batch Export", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                _exportResults.Add(new BatchSetExportResult
+                {
+                    SetName = setName,
+                    ElementCount = 0,
+                    OutputPath = "",
+                    Success = false,
+                    Message = ex.Message
+                });
             }
-            finally
+
+            _exportedCount++;
+            _progressBar.Value = _exportedCount;
+
+            // Schedule the next export after 800ms to allow Navisworks to process its idle queue and flush file locks
+            if (_exportQueue.Count > 0 && !_cancelRequested)
             {
-                _exporting = false;
-                _btnExport.Enabled = oldExportEnabled;
-                System.Windows.Forms.Cursor.Current = cursor;
+                _exportTimer.Interval = 800;
+                _exportTimer.Start();
             }
+            else
+            {
+                FinalizarBatch(_cancelRequested);
+            }
+        }
+
+        private void FinalizarBatch(bool cancelled)
+        {
+            if (_exportTimer != null)
+            {
+                _exportTimer.Stop();
+                _exportTimer.Tick -= ExportTimer_Tick;
+                _exportTimer.Dispose();
+                _exportTimer = null;
+            }
+
+            // Restore original visibility and selection state ONCE at the end of the batch
+            try
+            {
+                var originalHiddenCollection = ToModelItemCollection(_originalHidden);
+                _doc.Models.SetHidden(_allItemsCollection, false);
+                _doc.Models.SetHidden(originalHiddenCollection, true);
+                _doc.CurrentSelection.CopyFrom(_originalSelection);
+            }
+            catch
+            {
+                // Ignore restore failures
+            }
+
+            _progressBar.Value = _progressBar.Maximum;
+            _lblStatus.Text = cancelled ? "Export cancelled." : "Export completed.";
+            _exporting = false;
+            _btnExport.Enabled = true;
+
+            ShowSummary(_exportResults, cancelled);
+        }
+
+        private static ModelItemCollection ToModelItemCollection(IEnumerable<ModelItem> items)
+        {
+            var collection = new ModelItemCollection();
+            collection.AddRange(items);
+            return collection;
         }
 
         private void ShowSummary(List<BatchSetExportResult> results, bool cancelled)

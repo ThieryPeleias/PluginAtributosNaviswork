@@ -20,185 +20,130 @@ namespace Virtuart4DNavisworks
     {
         public const int DefaultFullMergeDepth = 20;
 
-        public static List<BatchSetExportResult> ExportSets(
+        public static BatchSetExportResult ExportSingleSet(
             Document doc,
-            IEnumerable<string> selectedSetNames,
+            string setName,
             string outputFolder,
             int mergeDepth,
             double originX,
             double originY,
             double originZ,
-            Action<int, string> progress = null,
-            Func<bool> checkCancel = null)
+            List<ModelItem> allItems)
         {
             if (doc == null || doc.IsClear)
                 throw new InvalidOperationException("No active Navisworks document.");
-
-            if (string.IsNullOrWhiteSpace(outputFolder) || !Directory.Exists(outputFolder))
-                throw new DirectoryNotFoundException("Output folder does not exist.");
-
-            if (mergeDepth <= 0)
-                throw new ArgumentOutOfRangeException(nameof(mergeDepth), "Merge depth must be greater than zero.");
-
-            var selectedNames = new HashSet<string>(
-                (selectedSetNames ?? Enumerable.Empty<string>())
-                    .Where(nome => !string.IsNullOrWhiteSpace(nome))
-                    .Select(nome => nome.Trim()),
-                StringComparer.OrdinalIgnoreCase);
 
             var allSets = SelectionSetCache.Collect(doc)
                 .Where(setInfo => !string.IsNullOrWhiteSpace(setInfo?.Nome))
                 .ToList();
 
-            var selectedSets = allSets
-                .Where(setInfo => selectedNames.Contains(setInfo.Nome))
-                .OrderBy(setInfo => setInfo.Nome, StringComparer.OrdinalIgnoreCase)
-                .ToList();
+            var setInfo = allSets.FirstOrDefault(s => string.Equals(s.Nome, setName, StringComparison.OrdinalIgnoreCase));
+            if (setInfo == null)
+            {
+                return new BatchSetExportResult
+                {
+                    SetName = setName,
+                    ElementCount = 0,
+                    OutputPath = "",
+                    Success = false,
+                    Message = "Set not found in document."
+                };
+            }
 
-            var results = new List<BatchSetExportResult>();
-            if (selectedSets.Count == 0)
-                return results;
+            var exportItems = ExpandItems(setInfo.Itens);
+            if (exportItems.Count == 0)
+            {
+                return new BatchSetExportResult
+                {
+                    SetName = setName,
+                    ElementCount = 0,
+                    OutputPath = "",
+                    Success = false,
+                    Message = "Set is empty."
+                };
+            }
 
-            var originalSelection = new Selection(doc.CurrentSelection);
-            var originalHidden = doc.Models.RootItemDescendantsAndSelf
-                .Where(item => item.IsHidden)
-                .ToList();
+            var outputPath = BuildOutputPath(outputFolder, setName);
 
-            var allItems = doc.Models.RootItemDescendantsAndSelf.ToList();
-            var allItemsCollection = ToModelItemCollection(allItems);
+            var attributeResult = AtributoService.GravarAtributos(
+                ToModelItemCollection(exportItems),
+                new List<AtributoCustom>
+                {
+                    new AtributoCustom(VirtuartSchema.CategoriaPrincipal, VirtuartSchema.PropriedadeSets, setName)
+                },
+                VirtuartSchema.CategoriaPrincipal);
+
+            var exportSuccess = false;
+            string exportMessage = "";
 
             try
             {
-                int index = 0;
-                foreach (var setInfo in selectedSets)
+                var exportSet = new HashSet<ModelItem>(exportItems);
+                var ancestorSet = new HashSet<ModelItem>();
+
+                foreach (var item in exportItems)
                 {
-                    if (checkCancel != null && checkCancel())
+                    var current = item.Parent;
+                    while (current != null)
                     {
-                        break;
+                        ancestorSet.Add(current);
+                        current = current.Parent;
                     }
-
-                    progress?.Invoke(index, $"Exporting set ({index + 1}/{selectedSets.Count}): {setInfo.Nome}");
-
-                    var exportItems = ExpandItems(setInfo.Itens);
-                    if (exportItems.Count == 0)
-                    {
-                        results.Add(new BatchSetExportResult
-                        {
-                            SetName = setInfo.Nome,
-                            ElementCount = 0,
-                            OutputPath = "",
-                            Success = false,
-                            Message = "Set is empty."
-                        });
-                        index++;
-                        continue;
-                    }
-
-                    var outputPath = BuildOutputPath(outputFolder, setInfo.Nome);
-
-                    var attributeResult = AtributoService.GravarAtributos(
-                        ToModelItemCollection(exportItems),
-                        new List<AtributoCustom>
-                        {
-                            new AtributoCustom(VirtuartSchema.CategoriaPrincipal, VirtuartSchema.PropriedadeSets, setInfo.Nome)
-                        },
-                        VirtuartSchema.CategoriaPrincipal);
-
-                    var exportSuccess = false;
-                    string exportMessage = "";
-
-                    try
-                    {
-                        var exportSet = new HashSet<ModelItem>(exportItems);
-                        var ancestorSet = new HashSet<ModelItem>();
-
-                        foreach (var item in exportItems)
-                        {
-                            var current = item.Parent;
-                            while (current != null)
-                            {
-                                ancestorSet.Add(current);
-                                current = current.Parent;
-                            }
-                        }
-
-                        var itemsToHide = allItems
-                            .Where(item => !exportSet.Contains(item) && !ancestorSet.Contains(item))
-                            .ToList();
-
-                        var itemsToHideCollection = ToModelItemCollection(itemsToHide);
-                        var exportItemsCollection = ToModelItemCollection(exportItems);
-                        var selectionItems = new ModelItemCollection();
-                        selectionItems.AddRange(exportItems);
-
-                        // Isolate this set's elements
-                        doc.Models.SetHidden(itemsToHideCollection, true);
-                        doc.Models.SetHidden(ToModelItemCollection(ancestorSet), false);
-                        doc.Models.SetHidden(exportItemsCollection, false);
-                        doc.CurrentSelection.CopyFrom(selectionItems);
-
-                        exportSuccess = DatasmithExporterService.ExportActiveDocument(
-                            doc,
-                            outputPath,
-                            mergeDepth,
-                            originX,
-                            originY,
-                            originZ,
-                            "Batch Set Export",
-                            setInfo.Nome,
-                            setInfo.Nome,
-                            null,
-                            useAutomation: true);
-
-                        exportMessage = exportSuccess
-                            ? $"Exported to: {outputPath}"
-                            : "Export failed. Check the export log for details.";
-                    }
-                    catch (Exception ex)
-                    {
-                        exportMessage = ex.Message;
-                    }
-
-                    var result = new BatchSetExportResult
-                    {
-                        SetName = setInfo.Nome,
-                        ElementCount = exportItems.Count,
-                        OutputPath = outputPath,
-                        Success = exportSuccess,
-                        Message = exportMessage,
-                        HasAttributeWarning = attributeResult.sucesso == 0 || attributeResult.erros > 0
-                    };
-
-                    if (result.HasAttributeWarning)
-                    {
-                        result.Message = $"Attribute warning: {attributeResult.mensagem} | {result.Message}";
-                    }
-
-                    results.Add(result);
-                    index++;
-
-                    // Yield execution and sleep briefly to allow the exporter to release files
-                    System.Windows.Forms.Application.DoEvents();
-                    System.Threading.Thread.Sleep(500);
                 }
+
+                var itemsToHide = allItems
+                    .Where(item => !exportSet.Contains(item) && !ancestorSet.Contains(item))
+                    .ToList();
+
+                var itemsToHideCollection = ToModelItemCollection(itemsToHide);
+                var exportItemsCollection = ToModelItemCollection(exportItems);
+                var selectionItems = new ModelItemCollection();
+                selectionItems.AddRange(exportItems);
+
+                // Isolate this set's elements
+                doc.Models.SetHidden(itemsToHideCollection, true);
+                doc.Models.SetHidden(ToModelItemCollection(ancestorSet), false);
+                doc.Models.SetHidden(exportItemsCollection, false);
+                doc.CurrentSelection.CopyFrom(selectionItems);
+
+                exportSuccess = DatasmithExporterService.ExportActiveDocument(
+                    doc,
+                    outputPath,
+                    mergeDepth,
+                    originX,
+                    originY,
+                    originZ,
+                    "Batch Set Export",
+                    setName,
+                    setName,
+                    null,
+                    useAutomation: true);
+
+                exportMessage = exportSuccess
+                    ? $"Exported to: {outputPath}"
+                    : "Export failed. Check the export log for details.";
             }
-            finally
+            catch (Exception ex)
             {
-                // Restore original visibility and selection state ONCE at the end of the batch
-                try
-                {
-                    var originalHiddenCollection = ToModelItemCollection(originalHidden);
-                    doc.Models.SetHidden(allItemsCollection, false);
-                    doc.Models.SetHidden(originalHiddenCollection, true);
-                    doc.CurrentSelection.CopyFrom(originalSelection);
-                }
-                catch
-                {
-                    // Ignore restore failures
-                }
+                exportMessage = ex.Message;
             }
 
-            return results;
+            var result = new BatchSetExportResult
+            {
+                SetName = setName,
+                ElementCount = exportItems.Count,
+                OutputPath = outputPath,
+                Success = exportSuccess,
+                Message = exportMessage,
+                HasAttributeWarning = attributeResult.sucesso == 0 || attributeResult.erros > 0
+            };
+
+            if (result.HasAttributeWarning)
+            {
+                result.Message = $"Attribute warning: {attributeResult.mensagem} | {result.Message}";
+            }
+
+            return result;
         }
 
         private static List<ModelItem> ExpandItems(ModelItemCollection items)
